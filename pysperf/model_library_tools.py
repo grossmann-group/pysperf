@@ -34,6 +34,7 @@ def register_model(
         Objective value of optimal solution. Either `soln_value` or `opt_value` must be specified.
     bigM : float, optional
         Default Big-M parameter value to use.
+        We inject the BigM `Suffix` and set ``pyomo_model.BigM[None] = bigM``.
 
     """
     if name in models:
