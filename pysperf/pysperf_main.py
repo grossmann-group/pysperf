@@ -9,6 +9,6 @@ from solver_library_tools import list_solver_capabilities
 if __name__ == "__main__":
     from pysperf.models import *  # Imports the models and registers them
     from pysperf.solvers import *  # Imports the solvers and registers them
-    # compute_model_stats()
+    compute_model_stats()
     # list_solver_capabilities()
-    execute_matrix_run()
+    # execute_matrix_run()

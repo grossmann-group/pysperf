@@ -54,7 +54,7 @@ def run_test_case():
     run_result.update(**solve_run_result)
     # Dump results
     with open('pyspa_result.log', 'w') as result_file:
-        yaml.safe_dump(run_result)
+        yaml.safe_dump(run_result, result_file)
     # Create pytrace file
     pass  # TODO: write this
 

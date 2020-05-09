@@ -1,13 +1,14 @@
-from functools import wraps
+import logging
 from typing import Callable, Optional
 
 import pandas
-from pyutilib.misc import Container
+import yaml
 
 from base_classes import _TestModel
+from config import models
+from model_types import ModelType
 from pyomo.environ import Suffix
 from pyomo.util.model_size import build_model_size_report
-from config import models
 
 
 def register_model(
@@ -46,11 +47,13 @@ def register_model(
     new_model.opt_value = opt_value
 
     # Add default BigM if one was offered
-    def build_function_with_BM_suffix(pyomo_model):
+    def build_function_with_BM_suffix():
+        pyomo_model = build_function()
         bm_suffix = pyomo_model.component("BigM")
         if bm_suffix is None:
             bm_suffix = pyomo_model.BigM = Suffix()
         bm_suffix[None] = bigM
+        return pyomo_model
     new_model.build_function = build_function_with_BM_suffix
     models[name] = new_model
 
@@ -74,19 +77,29 @@ def register_model_builder(
 
 
 def compute_model_stats():
-    reports = [(model.name, model.convex, build_model_size_report(model.build_function()))
-               for model in models.values()]
-    for name, convex, report in reports:
-        report.activated.name = name
-        report.activated.convex = convex
-    columns = [
+    models_loaded_from_cache = _load_from_model_stats_cache()
+
+    for test_model in models.values():
+        if test_model.name in models_loaded_from_cache:
+            continue
+        pyomo_model = test_model.build_function()
+        size_report = build_model_size_report(pyomo_model)
+        # update test_model object with information from model size report
+        test_model.update(size_report.activated)
+        if test_model.model_type is None:
+            test_model.model_type = infer_model_type(test_model)
+
+    # Cache the model stats
+    _cache_model_stats()
+
+    columns = [  # We specify this list so that the columns are ordered
         'name',
         'variables', 'binary_variables', 'integer_variables', 'continuous_variables',
         'constraints', 'nonlinear_constraints',
-        'disjuncts', 'disjunctions', 'convex',
+        'disjuncts', 'disjunctions', 'convex', 'model_type',
     ]
     df = pandas.DataFrame.from_records(
-        tuple(report.activated for _, report in reports),
+        tuple({key: test_model[key] for key in columns} for test_model in models.values()),
         columns=columns
     ).set_index("name")
     with pandas.option_context(
@@ -96,4 +109,61 @@ def compute_model_stats():
     print(df)
 
 
+def infer_model_type(test_model):
+    if test_model.disjunctions:
+        if test_model.nonlinear_constraints:
+            if not test_model.convex:
+                return ModelType.GDP
+            else:
+                return ModelType.cvxGDP
+        else:
+            return ModelType.DP
+    else:  # Not disjunctive
+        if test_model.nonlinear_constraints and (
+                test_model.binary_variables or test_model.integer_variables):
+            if not test_model.convex:
+                return ModelType.MINLP
+            else:
+                return ModelType.cvxMINLP
+        elif test_model.nonlinear_constraints:
+            if not test_model.convex:
+                return ModelType.NLP
+            else:
+                return ModelType.cvxNLP
+        elif test_model.binary_variables or test_model.integer_variables:
+            return ModelType.MILP
+        else:
+            return ModelType.LP
 
+
+def _load_from_model_stats_cache():
+    try:
+        with open('model.info.pfcache', 'r') as cachefile:
+            # Note: should work equally well with json
+            cached_models = yaml.safe_load_all(cachefile)
+            loaded_model_names = set()
+            for test_model in cached_models:
+                loaded_model_names.add(test_model['name'])
+                if 'model_type' in test_model:
+                    test_model['model_type'] = ModelType[test_model['model_type']]
+                library_model = models.get(test_model['name'], None)
+                if library_model is not None:
+                    library_model.update(test_model)
+                else:
+                    logging.warning(f"Cached model {test_model['name']} not found in library. "
+                                    "Cache may be invalid.")
+    except FileNotFoundError:
+        loaded_model_names = set()
+    return loaded_model_names
+
+
+def _cache_model_stats():
+    excluded_keys = {"build_function"}
+    model_info_to_cache = [{k: v for (k, v) in model.items()
+                            if k not in excluded_keys and v is not None}
+                           for model in models.values()]
+    for test_model in model_info_to_cache:
+        test_model['model_type'] = test_model['model_type'].name
+    # Note: should work equally well with json
+    with open('model.info.pfcache', 'w') as cachefile:
+        yaml.safe_dump_all(model_info_to_cache, cachefile)

@@ -1,5 +1,4 @@
 from enum import Enum, auto, unique
-from typing import Set
 
 
 @unique
