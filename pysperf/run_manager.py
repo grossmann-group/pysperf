@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from pysperf.model_library import models
@@ -18,8 +19,7 @@ def execute_matrix_run():
     runsdir = Path("output/runs/")
     runsdir.mkdir(exist_ok=True)
     # Make a new run directory
-    rundirs = runsdir.glob("run*/")
-    rundirs = set(rundir.name for rundir in rundirs)
+    rundirs = set(rundir.name for rundir in runsdir.glob("run*/"))
     next_run_num = 1
     next_run_dir = f"run{next_run_num}"
     while next_run_dir in rundirs:
@@ -31,5 +31,15 @@ def execute_matrix_run():
     for model_name, solver_name in jobs:
         single_run_dir = this_run_dir.joinpath(solver_name, model_name)
         single_run_dir.mkdir(parents=True, exist_ok=False)
-    # submit job
+        # submit job
+        # build execution script
+        runner_file = Path("pysperf_runner.py")
+        execute_script = f"""
+#!/bin/bash
+
+cd {single_run_dir.resolve()}
+{sys.executable} {runner_file.resolve()} > >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)
+        """.strip() + "\n"
+        single_run_dir.joinpath("single_run.sh").write_text(execute_script)
+        # Submit job for execution
     pass
