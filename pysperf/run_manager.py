@@ -1,11 +1,14 @@
 import sys
+import textwrap
 from pathlib import Path
+
+import yaml
 
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 
 
-def execute_matrix_run():
+def setup_matrix_run():
     # create matrix of jobs to run
     jobs = {
         (model_name, solver_name)
@@ -31,15 +34,19 @@ def execute_matrix_run():
     for model_name, solver_name in jobs:
         single_run_dir = this_run_dir.joinpath(solver_name, model_name)
         single_run_dir.mkdir(parents=True, exist_ok=False)
-        # submit job
         # build execution script
         runner_file = Path("pysperf_runner.py")
-        execute_script = f"""
-#!/bin/bash
-
-cd {single_run_dir.resolve()}
-{sys.executable} {runner_file.resolve()} > >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)
-        """.strip() + "\n"
+        execute_script = f"""\
+        #!/bin/bash
+        
+        cd {single_run_dir.resolve()}
+        {sys.executable} {runner_file.resolve()} > >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)
+        """
+        execute_script = textwrap.dedent(execute_script)
         single_run_dir.joinpath("single_run.sh").write_text(execute_script)
-        # Submit job for execution
+
+    # Submit jobs for execution
+    with this_run_dir.joinpath("run.queue.pfcache").open('w') as runcache:
+        yaml.safe_dump(jobs, runcache)
+        # TODO this would be qsub, but here we will add it to an execution queue
     pass

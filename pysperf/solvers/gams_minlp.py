@@ -1,5 +1,5 @@
 from base_classes import _SingleRunResult
-from config import base_gams_options
+from config import base_gams_options, time_limit
 from model_types import ModelType
 from pyomo.environ import SolverFactory
 from solver_library_tools import register_GDP_reformulations, register_solve_function
@@ -15,7 +15,7 @@ def DICOPT(pyomo_model):
         pyomo_model,
         tee=True,
         solver='baron',
-        add_options=base_gams_options
+        add_options=base_gams_options + [f'option reslim={time_limit};']
     )
     run_result.solver_run_time = pyomo_results.solver.timing.total
     run_result.iterations = pyomo_results.solver.iterations
