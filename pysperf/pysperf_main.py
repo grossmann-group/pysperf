@@ -11,4 +11,4 @@ if __name__ == "__main__":
     from pysperf.solvers import *  # Imports the solvers and registers them
     compute_model_stats()
     # list_solver_capabilities()
-    # execute_matrix_run()
+    execute_matrix_run()
