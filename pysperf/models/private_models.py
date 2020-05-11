@@ -1,15 +1,11 @@
 """
 Models in my personal library that I do not yet have permission to release,
-or have simply not been released yet.
+or have simply not formatted for release yet.
 """
-from functools import partial
 
 import qmodels
 
 from pysperf.model_library_tools import register_model, register_model_builder
-from pysperf.config import models
-
-# from qmodels.pyomo_convert.batch_processing import build_model
 
 register_model(
     name="batchp",
