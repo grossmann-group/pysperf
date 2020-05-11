@@ -23,6 +23,8 @@ with Path(__file__).parent.joinpath('pysperf.config').open() as configfile:
     options.update(tester_options)
 
 
+time_format = "%Y-%m-%d %X.%f"
+
+
 def get_formatted_time_now():
-    time_format = "%Y-%m-%d %X.%f"
     return datetime.now().strftime(time_format)

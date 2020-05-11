@@ -7,7 +7,7 @@ import yaml
 from base_classes import _TestModel
 from config import models, outputdir
 from model_types import ModelType
-from pyomo.environ import Suffix
+import pyomo.environ as pyo
 from pyomo.util.model_size import build_model_size_report
 
 
@@ -52,7 +52,7 @@ def register_model(
         pyomo_model = build_function()
         bm_suffix = pyomo_model.component("BigM")
         if bm_suffix is None:
-            bm_suffix = pyomo_model.BigM = Suffix()
+            bm_suffix = pyomo_model.BigM = pyo.Suffix()
         bm_suffix[None] = bigM
         return pyomo_model
     new_model.build_function = build_function_with_BM_suffix
@@ -89,6 +89,9 @@ def compute_model_stats():
         test_model.update(size_report.activated)
         if test_model.model_type is None:
             test_model.model_type = infer_model_type(test_model)
+        # Determine objective sense
+        active_obj = next(pyomo_model.component_data_objects(pyo.Objective, active=True))
+        test_model.objective_sense = 'minimize' if active_obj.sense == pyo.minimize else 'maximize'
 
     # Cache the model stats
     _cache_model_stats()

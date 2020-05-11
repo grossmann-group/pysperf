@@ -12,4 +12,4 @@ if __name__ == "__main__":
     # list_solver_capabilities()
     # setup_matrix_run()
     # execute_run()
-    # collect_run_info()
+    collect_run_info()
