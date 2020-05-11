@@ -178,8 +178,8 @@ def collect_run_info():
             termination_condition_to_gams_format(job_result.termination_condition),
             # GAMS model return status - see the GAMS return codes section.
             solver_status_to_gams(pyo.SolverStatus.ok),  # GAMS solver return status - see the GAMS return codes section.
-            job_result.UB,  # value of objecive function
-            job_result.UB,  # objective function estimate
+            job_result.UB,  # value of objective function
+            job_result.UB,  # objective function estimate # TODO I think this only works for minimize?
             job_result.solver_run_time,  # resource time used (sec)
             job_result.iterations,  # number of solver iterations
             0,  # dom used
