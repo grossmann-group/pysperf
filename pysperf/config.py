@@ -1,5 +1,6 @@
 """Global registry"""
 from datetime import datetime
+from pathlib import Path
 
 import yaml
 from pyutilib.misc import Container
@@ -7,6 +8,7 @@ from pyutilib.misc import Container
 # Registries for the models and solvers
 models = Container()
 solvers = Container()
+config = Container()
 
 base_gams_options = [
     'option optcr=0.01;',
@@ -14,11 +16,9 @@ base_gams_options = [
     'option solvelink=5;'
 ]
 
-with open('pysperf.config') as file:
-    tester_options = yaml.safe_load(file)
-    time_limit = tester_options["time limit"]
-    opt_tol = tester_options["optimality tolerance"]
-    ok_tol = tester_options["ok solution tolerance"]
+with Path(__file__).parent.joinpath('pysperf.config').open() as configfile:
+    tester_options = yaml.safe_load(configfile)
+    config.update(tester_options)
 
 
 def get_formatted_time_now():

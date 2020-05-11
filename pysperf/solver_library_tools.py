@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Callable, Optional, Set
 
 import pandas
@@ -58,7 +59,7 @@ def register_GDP_reformulations(mip_solve_function):
     gdp_compatible_mtypes = {mip_to_gdp_map[mtype] for mtype in mip_solve_function._compat_mtypes}
     gdp_global_mtypes = {mip_to_gdp_map[mtype] for mtype in mip_solve_function._global_mtypes}
 
-    for xfrm_name, xfrm in gdp_transformation_methods.items():
+    def get_solve_function_with_xfrm(xfrm):
         def gdp_solve_function(pyomo_model: ConcreteModel) -> _SingleRunResult:
             run_result = _SingleRunResult()
             run_result.gdp_to_mip_xfrm_start_time = get_formatted_time_now()
@@ -67,10 +68,12 @@ def register_GDP_reformulations(mip_solve_function):
             mip_run_result = mip_solve_function(pyomo_model)
             run_result.update(mip_run_result)
             return run_result
+        return gdp_solve_function
 
+    for xfrm_name, xfrm in gdp_transformation_methods.items():
         register_solver(
             name=mip_solve_function.__name__ + "-" + xfrm_name,
-            solve_function=gdp_solve_function,
+            solve_function=get_solve_function_with_xfrm(xfrm),
             compatible_model_types=gdp_compatible_mtypes,
             global_for_model_types=gdp_global_mtypes,
         )
