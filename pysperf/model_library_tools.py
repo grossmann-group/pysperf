@@ -5,7 +5,7 @@ import pandas
 import yaml
 
 from base_classes import _TestModel
-from config import models
+from config import models, outputdir
 from model_types import ModelType
 from pyomo.environ import Suffix
 from pyomo.util.model_size import build_model_size_report
@@ -14,7 +14,7 @@ from pyomo.util.model_size import build_model_size_report
 def register_model(
         name: str, build_function: Callable,
         model_type=None, convex=None,
-        soln_value=None, opt_value=None, bigM=None) -> None:
+        best_value=None, opt_value=None, bigM=None) -> None:
     """
     Registers the model in the model library.
 
@@ -28,10 +28,10 @@ def register_model(
         Model classification (e.g. MINLP)
     convex : bool, optional
         Indicate whether the model is convex
-    soln_value: float, optional
-        Objective value of best known solution. Either `soln_value` or `opt_value` must be specified.
+    best_value: float, optional
+        Objective value of best known solution. Either `best_value` or `opt_value` must be specified.
     opt_value: float, optional
-        Objective value of optimal solution. Either `soln_value` or `opt_value` must be specified.
+        Objective value of optimal solution. Either `best_value` or `opt_value` must be specified.
     bigM : float, optional
         Default Big-M parameter value to use.
         We inject the BigM `Suffix` and set ``pyomo_model.BigM[None] = bigM``.
@@ -44,7 +44,7 @@ def register_model(
     new_model.build_function = build_function
     new_model.model_type = model_type
     new_model.convex = convex
-    new_model.soln_value = soln_value
+    new_model.best_value = best_value
     new_model.opt_value = opt_value
 
     # Add default BigM if one was offered
@@ -61,14 +61,14 @@ def register_model(
 
 def register_model_builder(
         name: Optional[str] = None, model_type=None, convex: Optional[bool] = None,
-        soln_value: Optional[float] = None, opt_value: Optional[float] = None,
+        best_value: Optional[float] = None, opt_value: Optional[float] = None,
         bigM: Optional[float] = None) -> Callable:
     def anon_decorator(build_function):
-        register_model(build_function.__name__, build_function, model_type, convex, soln_value, opt_value, bigM)
+        register_model(build_function.__name__, build_function, model_type, convex, best_value, opt_value, bigM)
         return build_function
 
     def named_decorator(build_function):
-        register_model(name, build_function, model_type, convex, soln_value, opt_value, bigM)
+        register_model(name, build_function, model_type, convex, best_value, opt_value, bigM)
         return build_function
 
     if name is None:
@@ -107,7 +107,15 @@ def compute_model_stats():
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
     ), open('models.info.log', 'w') as resultsfile:
         print(df, file=resultsfile)
-    print(df)
+
+    # Create solu file
+    with outputdir.joinpath("pysperf_models.solu").open('w') as solufile:
+        for test_model in models.values():
+            if test_model.opt_value is not None:
+                soln_type, soln_value = "=opt=", test_model.opt_value
+            else:
+                soln_type, soln_value = "=best=", test_model.best_value
+            print(f"{soln_type}\t{test_model.name}\t{soln_value}", file=solufile)
 
 
 def infer_model_type(test_model):
@@ -159,7 +167,7 @@ def _load_from_model_stats_cache():
 
 
 def _cache_model_stats():
-    excluded_keys = {"build_function"}
+    excluded_keys = {"build_function", "opt_value", "best_value"}
     model_info_to_cache = [{k: v for (k, v) in model.items()
                             if k not in excluded_keys and v is not None}
                            for model in models.values()]

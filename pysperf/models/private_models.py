@@ -29,28 +29,28 @@ register_model(
 @register_model_builder(opt_value=106767)
 def HENS_conv():
     return qmodels.hens.conventional.build_conventional(True, 4)[0]
-@register_model_builder(soln_value=134522)
+@register_model_builder(best_value=134522)
 def HENS_int_sing():
     return qmodels.hens.modular_integer.build_single_module(True, 4)[0]
-@register_model_builder(soln_value=112270)
+@register_model_builder(best_value=112270)
 def HENS_int_mult():
     return qmodels.hens.modular_integer.build_require_modular(True, 4)[0]
-@register_model_builder(soln_value=101505)
+@register_model_builder(best_value=101505)
 def HENS_int_opt():
     return qmodels.hens.modular_integer.build_modular_option(True, 4)[0]
-@register_model_builder(soln_value=134522)
+@register_model_builder(best_value=134522)
 def HENS_disc_sing():
     return qmodels.hens.modular_discrete_single_module.build_single_module(True, 4)[0]
-@register_model_builder(soln_value=111520)
+@register_model_builder(best_value=111520)
 def HENS_disc_mult():
     return qmodels.hens.modular_discrete.build_require_modular(True, 4)[0]
-@register_model_builder(soln_value=101505)
+@register_model_builder(best_value=101505)
 def HENS_disc_opt():
     return qmodels.hens.modular_discrete.build_modular_option(True, 4)[0]
 
 
 # Kaibel column
-@register_model_builder(bigM=1e6, soln_value=115637)
+@register_model_builder(bigM=1e6, best_value=115637)
 def Kaibel():
     from qmodels.kaibel.kaibel_solve_gdp import build_model
     m = build_model()
@@ -82,7 +82,7 @@ def Kaibel():
 
 
 # Membrane model
-@register_model_builder()
+@register_model_builder(bigM=1e6, best_value=1441161)
 def Memb():
     from qmodels.membrane.cascade_v3_STELLA import build_model, adding_integerConstr
     m = build_model()
@@ -112,11 +112,11 @@ def Mod_decay():
 
 
 # Modular network design - distributed facility location
-@register_model_builder(bigM=10000, soln_value=36262)
+@register_model_builder(bigM=10000, best_value=36262)
 def Mod_dist():
     from qmodels.modular_econ.distributed import build_modular_model
     return build_modular_model()
-@register_model_builder(bigM=10000, soln_value=19568)
+@register_model_builder(bigM=10000, best_value=19568)
 def Mod_qtr():
     from qmodels.modular_econ.quarter_distributed import build_modular_model
     return build_modular_model()
@@ -149,27 +149,27 @@ def build_stranded_gas_function(valid_modules):
 register_model(
     name="Gas_100",
     build_function=build_stranded_gas_function(valid_modules=['U100']),
-    soln_value=-12.34
+    best_value=-12.34
 )
 register_model(
     name="Gas_250",
     build_function=build_stranded_gas_function(valid_modules=['U250']),
-    soln_value=-18.37
+    best_value=-18.37
 )
 register_model(
     name="Gas_500",
     build_function=build_stranded_gas_function(valid_modules=['U500']),
-    soln_value=-4.690
+    best_value=-4.690
 )
 register_model(
     name="Gas_small",
     build_function=build_stranded_gas_function(valid_modules=['U100', 'U250']),
-    soln_value=-18.37
+    best_value=-18.37
 )
 register_model(
     name="Gas_large",
     build_function=build_stranded_gas_function(valid_modules=['U250', 'U500']),
-    soln_value=-18.37
+    best_value=-18.37
 )
 
 

@@ -13,14 +13,13 @@ Output directory structure:
                     stderr.log
                     pysperf_runner.config
                     pysperf_result.log
-                    pysperf_case.pytrace
                 - 8PP
                 - ...
-                solver.pytrace
+                [future solver summary file]
             - BARON-BM
                 - MeOH
                 - ...
-            pysperf_run.pytrace
+            run.info.pfdata
         - run2
         - ...
     [broad_overview_files]

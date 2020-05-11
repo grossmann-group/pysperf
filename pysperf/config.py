@@ -16,6 +16,8 @@ base_gams_options = [
     'option solvelink=5;'
 ]
 
+outputdir = Path(__file__).parent.joinpath("output/")
+
 with Path(__file__).parent.joinpath('pysperf.config').open() as configfile:
     tester_options = yaml.safe_load(configfile)
     options.update(tester_options)

@@ -132,4 +132,5 @@ dmypy.json
 .idea/*
 
 *.pfcache
+*.pfdata
 pysperf/output/*
