@@ -148,12 +148,12 @@ def collect_run_info():
         print(f" - {solver_name} {model_name}")
 
     # Create trace file
-    trace_header = textwrap.dedent("""\
+    trace_header = """\
         * Trace Record Definition
         * GamsSolve
         * InputFileName,SolverName,OptionFile,Direction,NumberOfEquations,NumberOfVariables,NumberOfDiscreteVariables,NumberOfNonZeros,NumberOfNonlinearNonZeros,
         * ModelStatus,SolverStatus,ObjectiveValue,ObjectiveValueEstimate,SolverTime,ETSolver,NumberOfIterations,NumberOfNodes
-        """)
+        """
     trace_data = []
     for model_name, solver_name in finished:
         with this_run_dir.joinpath(solver_name, model_name, "pysperf_result.log").open('r') as resultfile:
@@ -189,6 +189,8 @@ def collect_run_info():
         trace_data.append(trace_line)
 
     with this_run_dir.joinpath("results.trc").open('w') as tracefile:
+        tracefile.write(textwrap.dedent(trace_header))
+        tracefile.write('*\n')
         csvwriter = csv.writer(tracefile)
         for trace_line in trace_data:
             csvwriter.writerow(trace_line)
