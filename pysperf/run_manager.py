@@ -1,6 +1,8 @@
 import stat
 import sys
 import textwrap
+from collections import defaultdict
+from math import ceil
 from pathlib import Path
 from typing import Optional
 
@@ -61,8 +63,6 @@ def setup_matrix_run():
         yaml.safe_dump(dict(**options), runsinfofile)
     with this_run_dir.joinpath("run.queue.pfcache").open('w') as runcache:
         yaml.safe_dump(jobs, runcache)
-        # TODO this would be qsub, but here we will add it to an execution queue
-    pass
 
 
 def make_new_run_dir() -> Path:
@@ -84,3 +84,58 @@ def get_current_run_dir() -> Optional[Path]:
     if current_run_num is not None:
         return runsdir.joinpath(f"run{current_run_num}")
     return None
+
+
+def get_time_limit_with_buffer() -> int:
+    time_limit = options["time limit"]
+    buffer_percent = options["single run percent buffer"]
+    min_buffer = options["single run minimum buffer"]
+    time_limit += max(min_buffer, time_limit * buffer_percent / 100)
+    return int(ceil(time_limit))
+
+
+def collect_run_info():
+    with runsdir.joinpath("runs.info.pfcache").open('r') as runsinfofile:
+        runsinfo = yaml.safe_load(runsinfofile)
+        options.update(runsinfo)
+    this_run_dir = get_current_run_dir()
+    with this_run_dir.joinpath("run.queue.pfcache").open('r') as runcache:
+        jobs = yaml.safe_load(runcache)
+    started = set()
+    model_built = set()
+    solve_call_completed = set()
+    finished = set()
+    for job in jobs:
+        job = tuple(job)
+        model_name, solver_name = job
+        single_run_dir = this_run_dir.joinpath(solver_name, model_name)
+        if single_run_dir.joinpath(".single_run_started.log").exists():
+            started.add(job)
+        if single_run_dir.joinpath(".single_run_model_built.log").exists():
+            model_built.add(job)
+        if single_run_dir.joinpath(".single_run_solve_called.log").exists():
+            solve_call_completed.add(job)
+        if single_run_dir.joinpath("pysperf_result.log").exists():
+            finished.add(job)
+    # Total jobs executed
+    print(f"{len(started)} of {len(jobs)} jobs executed.")
+    # Model build failures
+    jobs_with_failed_model_builds = started - model_built
+    models_with_failed_builds = {
+        model_name: solver_name for model_name, solver_name in jobs_with_failed_model_builds}
+    print(f"{len(models_with_failed_builds)} models had failed builds:")
+    for model_name, solver_name in models_with_failed_builds.items():
+        print(f" - {model_name} (see {solver_name})")
+    # Solver execute failures
+    solver_fails = defaultdict(list)
+    for model_name, solver_name in started - solve_call_completed:
+        solver_fails[solver_name].append(model_name)
+    print(f"{len(solver_fails)} solvers had failed executions:")
+    for solver_name, failed_list in solver_fails.items():
+        print(f" - {solver_name} ({len(failed_list)} failed): {sorted(failed_list)}")
+    with this_run_dir.joinpath("solver.failures.log").open('w') as failurelog:
+        yaml.safe_dump({k: sorted(v) for k, v in solver_fails.items()}, failurelog, default_flow_style=False)
+    # Timeouts and other errors
+    print(f"{len(started - finished)} jobs timed out:")
+    for model_name, solver_name in started - finished:
+        print(f" - {solver_name} {model_name}")
