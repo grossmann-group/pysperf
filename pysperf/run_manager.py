@@ -50,13 +50,13 @@ def setup_matrix_run():
         single_run_script.chmod(single_run_script.stat().st_mode | stat.S_IXUSR)  # chmod u+x
         # create run config
         single_run_config_path = single_run_dir.joinpath("pysperf_runner.config")
-        run_config = {
+        single_run_config = {
             "model name": model_name,
             "solver name": solver_name,
             "time limit": options["time limit"],
         }
         with single_run_config_path.open('w') as single_run_config_file:
-            yaml.safe_dump(run_config, single_run_config_file)
+            yaml.safe_dump(single_run_config, single_run_config_file)
 
     # Submit jobs for execution
     with runsdir.joinpath("runs.info.pfcache").open('w') as runsinfofile:

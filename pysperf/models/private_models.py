@@ -1,5 +1,5 @@
 """
-Models in my personal library that I do not yet have permission to release,
+Models in my personal library that I do not yet have permission from collaborators to release,
 or have simply not formatted for release yet.
 """
 
