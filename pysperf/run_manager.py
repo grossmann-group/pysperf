@@ -6,7 +6,7 @@ from typing import Optional
 
 import yaml
 
-from config import config
+from config import options
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 
@@ -33,11 +33,14 @@ def setup_matrix_run():
         single_run_dir.mkdir(parents=True, exist_ok=False)
         # build execution script
         runner_file = Path("pysperf_runner.py")
+        run_command = (f'{sys.executable} {runner_file.resolve()} '
+                       f'"{solver_name}" "{model_name}" "{options["time limit"]}s" '
+                       f'> >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)')
         execute_script = f"""\
         #!/bin/bash
         
         cd {single_run_dir.resolve()}
-        {sys.executable} {runner_file.resolve()} > >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)
+        {run_command}
         """
         execute_script = textwrap.dedent(execute_script)
         single_run_script = single_run_dir.joinpath("single_run.sh")
@@ -48,14 +51,14 @@ def setup_matrix_run():
         run_config = {
             "model name": model_name,
             "solver name": solver_name,
-            "time limit": config["time limit"],
+            "time limit": options["time limit"],
         }
         with single_run_config_path.open('w') as single_run_config_file:
             yaml.safe_dump(run_config, single_run_config_file)
 
     # Submit jobs for execution
     with runsdir.joinpath("runs.info.pfcache").open('w') as runsinfofile:
-        yaml.safe_dump(dict(**config), runsinfofile)
+        yaml.safe_dump(dict(**options), runsinfofile)
     with this_run_dir.joinpath("run.queue.pfcache").open('w') as runcache:
         yaml.safe_dump(jobs, runcache)
         # TODO this would be qsub, but here we will add it to an execution queue
@@ -72,12 +75,12 @@ def make_new_run_dir() -> Path:
         next_run_dir = f"run{next_run_num}"
     this_run_dir = runsdir.joinpath(next_run_dir)
     this_run_dir.mkdir(exist_ok=False)
-    config["current run number"] = next_run_num
+    options["current run number"] = next_run_num
     return this_run_dir
 
 
 def get_current_run_dir() -> Optional[Path]:
-    current_run_num = config.get('current run number', None)
+    current_run_num = options.get('current run number', None)
     if current_run_num is not None:
         return runsdir.joinpath(f"run{current_run_num}")
     return None

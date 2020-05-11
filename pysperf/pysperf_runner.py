@@ -29,7 +29,7 @@ from pathlib import Path
 
 import yaml
 
-from pysperf import _SingleRunResult, get_formatted_time_now, config
+from pysperf import _SingleRunResult, get_formatted_time_now, options
 
 
 def run_test_case():
@@ -40,7 +40,7 @@ def run_test_case():
         solver_name = runner_options["solver name"]
         # Time limit must be updated before solver library import.
         time_limit = runner_options["time limit"]
-        config.time_limit = time_limit
+        options.time_limit = time_limit
     # Setup run
     from pysperf.model_library import models
     from pysperf.solver_library import solvers

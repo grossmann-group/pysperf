@@ -1,5 +1,5 @@
 from base_classes import _SingleRunResult
-from config import base_gams_options, config
+from config import base_gams_options, options
 from model_types import ModelType
 from pyomo.environ import SolverFactory
 from solver_library_tools import register_solve_function
@@ -21,7 +21,7 @@ def LOA(pyomo_model):
         minlp_solver='gams',
         minlp_solver_args=dict(solver='dicopt', add_options=base_gams_options),
         iterlim=300,
-        time_limit=config.time_limit
+        time_limit=options.time_limit
     )
     run_result.solver_run_time = pyomo_results.solver.timing.total
     run_result.iterations = pyomo_results.solver.iterations

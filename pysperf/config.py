@@ -8,7 +8,7 @@ from pyutilib.misc import Container
 # Registries for the models and solvers
 models = Container()
 solvers = Container()
-config = Container()
+options = Container()
 
 base_gams_options = [
     'option optcr=0.01;',
@@ -18,7 +18,7 @@ base_gams_options = [
 
 with Path(__file__).parent.joinpath('pysperf.config').open() as configfile:
     tester_options = yaml.safe_load(configfile)
-    config.update(tester_options)
+    options.update(tester_options)
 
 
 def get_formatted_time_now():
