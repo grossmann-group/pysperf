@@ -4,12 +4,26 @@ from datetime import datetime
 
 import yaml
 
-from config import time_format
+from config import outputdir, time_format
 from paver_utils.julian import get_julian_datetime
 from paver_utils.parse_to_gams import termination_condition_to_gams_format, solver_status_to_gams
-from pysperf import _SingleRunResult
+from pysperf import _JobResult
 import pyomo.environ as pyo
 from pysperf.model_library import models
+
+
+def create_solu_file() -> None:
+    """
+    Creates the pysperf_models.solu file based on optimal and best-solution-known information for each model.
+    """
+    with outputdir.joinpath("pysperf_models.solu").open('w') as solufile:
+        for test_model in models.values():
+            if test_model.opt_value is not None:
+                soln_type, soln_value = "=opt=", test_model.opt_value
+            else:
+                soln_type, soln_value = "=best=", test_model.best_value
+            print(f"{soln_type}\t{test_model.name}\t{soln_value}", file=solufile)
+
 
 def create_paver_tracefile(this_run_dir, finished):
     # Create trace file
@@ -22,8 +36,8 @@ def create_paver_tracefile(this_run_dir, finished):
     trace_data = []
     for model_name, solver_name in finished:
         with this_run_dir.joinpath(solver_name, model_name, "pysperf_result.log").open('r') as resultfile:
-            job_result = _SingleRunResult(**yaml.safe_load(resultfile))
-        _validate_run_result(job_result)
+            job_result = _JobResult(**yaml.safe_load(resultfile))
+        _validate_job_result(job_result)
         test_model = models[model_name]
         trace_line = [
             model_name,  # Model Name
@@ -60,8 +74,8 @@ def create_paver_tracefile(this_run_dir, finished):
         csvwriter.writerows(trace_data)
 
 
-def _validate_run_result(run_result: _SingleRunResult):
-    if run_result.termination_condition is None:
-        run_result.termination_condition = pyo.TerminationCondition.unknown
-    elif type(run_result.termination_condition) == str:
-        run_result.termination_condition = pyo.TerminationCondition(run_result.termination_condition)
+def _validate_job_result(job_result: _JobResult):
+    if job_result.termination_condition is None:
+        job_result.termination_condition = pyo.TerminationCondition.unknown
+    elif type(job_result.termination_condition) == str:
+        job_result.termination_condition = pyo.TerminationCondition(job_result.termination_condition)

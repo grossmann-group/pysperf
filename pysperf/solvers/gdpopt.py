@@ -1,4 +1,4 @@
-from base_classes import _SingleRunResult
+from base_classes import _JobResult
 from config import base_gams_options, options
 from model_types import ModelType
 from pyomo.environ import SolverFactory
@@ -10,7 +10,7 @@ from solver_library_tools import register_solve_function
     compatible_model_types={ModelType.GDP},
     global_for_model_types={ModelType.cvxGDP})
 def LOA(pyomo_model):
-    run_result = _SingleRunResult()
+    job_result = _JobResult()
     pyomo_results = SolverFactory('gdpopt').solve(
         pyomo_model,
         tee=True,
@@ -23,9 +23,9 @@ def LOA(pyomo_model):
         iterlim=300,
         time_limit=options.time_limit
     )
-    run_result.solver_run_time = pyomo_results.solver.timing.total
-    run_result.iterations = pyomo_results.solver.iterations
-    run_result.termination_condition = pyomo_results.solver.termination_condition
-    run_result.LB = pyomo_results.problem.lower_bound
-    run_result.UB = pyomo_results.problem.upper_bound
-    return run_result
+    job_result.solver_run_time = pyomo_results.solver.timing.total
+    job_result.iterations = pyomo_results.solver.iterations
+    job_result.termination_condition = pyomo_results.solver.termination_condition
+    job_result.LB = pyomo_results.problem.lower_bound
+    job_result.UB = pyomo_results.problem.upper_bound
+    return job_result

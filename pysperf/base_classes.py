@@ -9,5 +9,5 @@ class _TestSolver(Container):
     pass
 
 
-class _SingleRunResult(Container):
+class _JobResult(Container):
     pass

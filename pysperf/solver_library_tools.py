@@ -3,14 +3,14 @@ from typing import Callable, Optional, Set
 
 import pandas
 
-from base_classes import _SingleRunResult, _TestSolver
+from base_classes import _JobResult, _TestSolver
 from config import solvers, get_formatted_time_now
 from model_types import ModelType
 from pyomo.environ import TransformationFactory, ConcreteModel
 
 
 def register_solver(
-        name: str, solve_function: Callable[[ConcreteModel], _SingleRunResult],
+        name: str, solve_function: Callable[[ConcreteModel], _JobResult],
         compatible_model_types: Optional[Set[ModelType]] = None,
         global_for_model_types: Optional[Set[ModelType]] = None) -> None:
     if name in solvers:
@@ -60,14 +60,14 @@ def register_GDP_reformulations(mip_solve_function):
     gdp_global_mtypes = {mip_to_gdp_map[mtype] for mtype in mip_solve_function._global_mtypes}
 
     def get_solve_function_with_xfrm(xfrm):
-        def gdp_solve_function(pyomo_model: ConcreteModel) -> _SingleRunResult:
-            run_result = _SingleRunResult()
-            run_result.gdp_to_mip_xfrm_start_time = get_formatted_time_now()
+        def gdp_solve_function(pyomo_model: ConcreteModel) -> _JobResult:
+            job_result = _JobResult()
+            job_result.gdp_to_mip_xfrm_start_time = get_formatted_time_now()
             xfrm.apply_to(pyomo_model)
-            run_result.gdp_to_mip_xfrm_end_time = get_formatted_time_now()
-            mip_run_result = mip_solve_function(pyomo_model)
-            run_result.update(mip_run_result)
-            return run_result
+            job_result.gdp_to_mip_xfrm_end_time = get_formatted_time_now()
+            mip_job_result = mip_solve_function(pyomo_model)
+            job_result.update(mip_job_result)
+            return job_result
         return gdp_solve_function
 
     for xfrm_name, xfrm in gdp_transformation_methods.items():

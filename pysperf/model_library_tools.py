@@ -5,7 +5,7 @@ import pandas
 import yaml
 
 from base_classes import _TestModel
-from config import models, outputdir
+from config import models
 from model_types import ModelType
 import pyomo.environ as pyo
 from pyomo.util.model_size import build_model_size_report
@@ -110,15 +110,6 @@ def compute_model_stats():
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
     ), open('models.info.log', 'w') as resultsfile:
         print(df, file=resultsfile)
-
-    # Create solu file
-    with outputdir.joinpath("pysperf_models.solu").open('w') as solufile:
-        for test_model in models.values():
-            if test_model.opt_value is not None:
-                soln_type, soln_value = "=opt=", test_model.opt_value
-            else:
-                soln_type, soln_value = "=best=", test_model.best_value
-            print(f"{soln_type}\t{test_model.name}\t{soln_value}", file=solufile)
 
 
 def infer_model_type(test_model):
