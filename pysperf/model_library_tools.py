@@ -1,4 +1,6 @@
 import logging
+from math import ceil
+from time import monotonic
 from typing import Callable, Optional
 
 import pandas
@@ -83,12 +85,15 @@ def compute_model_stats():
     for test_model in models.values():
         if test_model.name in models_loaded_from_cache:
             continue
+        build_start_time = monotonic()
         pyomo_model = test_model.build_function()
+        build_end_time = monotonic()
+        test_model.build_time = int(ceil(build_end_time - build_start_time))
         size_report = build_model_size_report(pyomo_model)
         # update test_model object with information from model size report
         test_model.update(size_report.activated)
         if test_model.model_type is None:
-            test_model.model_type = infer_model_type(test_model)
+            test_model.model_type = _infer_model_type(test_model)
         # Determine objective sense
         active_obj = next(pyomo_model.component_data_objects(pyo.Objective, active=True))
         test_model.objective_sense = 'minimize' if active_obj.sense == pyo.minimize else 'maximize'
@@ -96,11 +101,13 @@ def compute_model_stats():
     # Cache the model stats
     _cache_model_stats()
 
+
+def list_model_stats():
     columns = [  # We specify this list so that the columns are ordered
         'name',
         'variables', 'binary_variables', 'integer_variables', 'continuous_variables',
         'constraints', 'nonlinear_constraints',
-        'disjuncts', 'disjunctions', 'convex', 'model_type',
+        'disjuncts', 'disjunctions', 'convex', 'model_type', 'build_time',
     ]
     df = pandas.DataFrame.from_records(
         tuple({key: test_model[key] for key in columns} for test_model in models.values()),
@@ -110,9 +117,10 @@ def compute_model_stats():
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
     ), open('models.info.log', 'w') as resultsfile:
         print(df, file=resultsfile)
+        print(df)
 
 
-def infer_model_type(test_model):
+def _infer_model_type(test_model):
     if test_model.disjunctions:
         if test_model.nonlinear_constraints:
             if not test_model.convex:

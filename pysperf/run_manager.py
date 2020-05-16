@@ -51,7 +51,7 @@ def setup_new_matrix_run():
         {run_command}
         """
         execute_script = textwrap.dedent(execute_script)
-        single_job_script = single_job_dir.joinpath("single_job.sh")
+        single_job_script = single_job_dir.joinpath("run_job.sh")
         single_job_script.write_text(execute_script)
         single_job_script.chmod(single_job_script.stat().st_mode | stat.S_IXUSR)  # chmod u+x
         # create job config
@@ -94,10 +94,11 @@ def get_run_dir(run_number: Optional[int] = None) -> Path:
     return runsdir.joinpath(f"run{run_number}")
 
 
-def get_time_limit_with_buffer() -> int:
+def get_time_limit_with_buffer(model_build_time: Optional[int] = 0) -> int:
     time_limit = options.time_limit
-    buffer_percent = options["single run percent buffer"]
-    min_buffer = options["single run minimum buffer"]
+    buffer_percent = options["job time limit percent buffer"]
+    min_buffer = options["job time limit minimum buffer"]
+    time_limit += model_build_time
     time_limit += max(min_buffer, time_limit * buffer_percent / 100)
     return int(ceil(time_limit))
 

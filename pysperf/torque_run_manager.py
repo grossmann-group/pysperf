@@ -3,6 +3,7 @@ import subprocess
 import yaml
 
 from pysperf import options
+from pysperf.model_library import models
 from run_manager import get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
@@ -17,9 +18,9 @@ def execute_run():
     for jobnum, (model_name, solver_name) in enumerate(jobs, start=1):
         current_run_num = options["current run number"]
         print(f"Submitting run {current_run_num}-{jobnum}/{len(jobs)}: Solver {solver_name} with model {model_name}.")
-        runner_script = this_run_dir.joinpath(solver_name, model_name, "single_job.sh")
+        runner_script = this_run_dir.joinpath(solver_name, model_name, "run_job.sh")
         time_limit = options.time_limit
-        qsub_time_limit = _qsub_time_limit_with_buffer()
+        qsub_time_limit = _qsub_time_limit_with_buffer(models[model_name].build_time)
         processes = options.processes
         memory = options.memory
         subprocess.run([
@@ -30,8 +31,8 @@ def execute_run():
         ])
 
 
-def _qsub_time_limit_with_buffer():
-    time_limit = get_time_limit_with_buffer()
+def _qsub_time_limit_with_buffer(model_build_time):
+    time_limit = get_time_limit_with_buffer(model_build_time)
     hours, time_limit = divmod(time_limit, 3600)
     minutes, time_limit = divmod(time_limit, 60)
     seconds = round(time_limit)

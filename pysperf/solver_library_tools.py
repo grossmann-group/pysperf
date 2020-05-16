@@ -1,3 +1,4 @@
+import textwrap
 from functools import partial
 from typing import Callable, Optional, Set
 
@@ -103,8 +104,8 @@ def list_solver_capabilities():
     ), open('solvers.info.log', 'w') as resultsfile:
         print(df, file=resultsfile)
     print(df)
-    print("""\
-Legend:
-    G - solves model type to global optimality
-    X - compatible with model type
-    """)
+    print(textwrap.dedent("""\
+    Legend:
+        G - solves model type to global optimality
+        X - compatible with model type
+    """))
