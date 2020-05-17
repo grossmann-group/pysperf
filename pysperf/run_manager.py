@@ -7,22 +7,25 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from pysperf.model_library import models
+from pysperf.solver_library import solvers
 from pyutilib.misc import Container
 
 from .config import (
-    cache_internal_options_to_file, job_model_built_filename, job_solve_done_filename, job_stop_filename, options,
-    run_config_filename, runner_filepath,
-    runsdir,
-    job_start_filename, )
-from pysperf.model_library import models
-from pysperf.solver_library import solvers
+    cache_internal_options_to_file, job_model_built_filename, job_solve_done_filename, job_start_filename,
+    job_stop_filename, options, run_config_filename, runner_filepath, runsdir, )
 
 this_run_config = Container()
 
 
 def _write_run_config(this_run_dir: Path):
+    config_to_store = Container(**this_run_config)
+    if 'jobs_failed' in config_to_store:
+        config_to_store.jobs_failed = [(model, solver) for model, solver in config_to_store.jobs_failed]
+    if 'jobs_run' in config_to_store:
+        config_to_store.jobs_run = [(model, solver) for model, solver in config_to_store.jobs_run]
     with this_run_dir.joinpath(run_config_filename).open('w') as runinfofile:
-        yaml.safe_dump(dict(**this_run_config), runinfofile)
+        yaml.safe_dump(dict(**config_to_store), runinfofile)
 
 
 def _read_run_config(this_run_dir: Optional[Path] = None):
@@ -169,7 +172,7 @@ def collect_run_info(run_number: Optional[int] = None):
         print(f" - {solver_name} {model_name}")
 
     # Write failures to run info
-    this_run_config.jobs_failed = started - finished
+    this_run_config.jobs_failed = started - solver_done
     # TODO this should be augmented with solvers with bad termination conditions
     this_run_config.jobs_run = started
     _write_run_config(this_run_dir)
