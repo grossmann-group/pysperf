@@ -46,6 +46,8 @@ def run(args):
 
 
 def analyze(args):
+    run_number = args.r
+    collect_run_info(run_number)
     print(args)
 
 
@@ -67,7 +69,7 @@ def parse_command_line_arguments_and_run():
     new_or_redo.add_argument('--new', action='store_true', help="Create a new run.")
     new_or_redo.add_argument('--redo', action='store_true', help="Redo an existing run.")
     # Run number
-    run_parser.add_argument('-n', help="Specify a run number.", type=int)
+    run_parser.add_argument('-r', help="Specify a run number.", type=int)
     run_parser.add_argument('--time-limit', help="Override the config file time limit (seconds).", type=float)
     # Run engine
     run_parser.add_argument(
@@ -83,6 +85,7 @@ def parse_command_line_arguments_and_run():
 
     analyze_parser = subparsers.add_parser('analyze', description="Analyze run results.")
     analyze_parser.set_defaults(call_function=analyze)
+    analyze_parser.add_argument('-r', help="Specify a run number.", type=int)
 
     args = parser.parse_args()
     try:
