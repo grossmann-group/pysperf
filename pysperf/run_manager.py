@@ -9,7 +9,7 @@ from typing import Optional
 import yaml
 from pyutilib.misc import Container
 
-from config import (
+from .config import (
     cache_internal_options_to_file, job_model_built_filename, job_solve_done_filename, job_stop_filename, options,
     runner_filepath,
     runsdir,

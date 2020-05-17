@@ -1,14 +1,15 @@
 import logging
 from math import ceil
+from pathlib import Path
 from time import monotonic
 from typing import Callable, Optional
 
 import pandas
 import yaml
 
-from base_classes import _TestModel
-from config import models
-from model_types import ModelType
+from .base_classes import _TestModel
+from .config import _model_cache_path, models
+from .model_types import ModelType
 import pyomo.environ as pyo
 from pyomo.util.model_size import build_model_size_report
 
@@ -149,7 +150,7 @@ def _infer_model_type(test_model):
 
 def _load_from_model_stats_cache():
     try:
-        with open('model.info.pfcache', 'r') as cachefile:
+        with _model_cache_path.open('r') as cachefile:
             # Note: should work equally well with json
             cached_models = yaml.safe_load_all(cachefile)
             loaded_model_names = set()
@@ -176,5 +177,5 @@ def _cache_model_stats():
     for test_model in model_info_to_cache:
         test_model['model_type'] = test_model['model_type'].name
     # Note: should work equally well with json
-    with open('model.info.pfcache', 'w') as cachefile:
+    with _model_cache_path.open('w') as cachefile:
         yaml.safe_dump_all(model_info_to_cache, cachefile)

@@ -4,7 +4,7 @@ from os.path import join, normpath
 
 from pyutilib.misc import import_file
 
-from model_library_tools import register_model_builder, register_model
+from pysperf.model_library_tools import register_model
 from pyomo.common.fileutils import PYOMO_ROOT_DIR
 
 

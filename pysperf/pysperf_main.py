@@ -3,11 +3,11 @@ from argparse import ArgumentParser, FileType
 
 from pyutilib.misc import Container
 
-from model_library_tools import list_model_stats
-from paver_utils.convert_to_paver import create_solu_file
-from pysperf import options
-from run_manager import setup_new_matrix_run, collect_run_info
-from solver_library_tools import list_solver_capabilities
+from .model_library_tools import list_model_stats
+from .paver_utils.convert_to_paver import create_solu_file
+from .config import options
+from .run_manager import setup_new_matrix_run, collect_run_info
+from .solver_library_tools import list_solver_capabilities
 
 
 # TODO This module will host all of the argument parsing to support different operations on the test suite
@@ -35,7 +35,7 @@ def run(args):
         if args.run_with == "torque":
             from torque_run_manager import execute_run
             execute_run()
-        elif args.runwith == "serial":
+        elif args.run_with == "serial":
             from serial_run_manager import execute_run
             execute_run()
         else:
@@ -49,7 +49,7 @@ def analyze(args):
     print(args)
 
 
-def parse_command_line_arguments():
+def parse_command_line_arguments_and_run():
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(title="Subcommands")
 
@@ -85,8 +85,14 @@ def parse_command_line_arguments():
     analyze_parser.set_defaults(call_function=analyze)
 
     args = parser.parse_args()
-    args.call_function(args)
+    try:
+        args.call_function(args)
+    except AttributeError as err:
+        if "'Namespace' object has no attribute 'call_function'" in str(err):
+            print("For usage directions, run 'pysperf -h'.")
+        else:
+            raise
 
 
 if __name__ == "__main__":
-    parse_command_line_arguments()
+    parse_command_line_arguments_and_run()

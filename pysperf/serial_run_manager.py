@@ -5,7 +5,7 @@ import yaml
 
 from pysperf import options
 from pysperf.model_library import models
-from run_manager import get_run_dir, get_time_limit_with_buffer, this_run_config
+from .run_manager import get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
 def execute_run():

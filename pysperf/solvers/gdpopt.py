@@ -1,8 +1,9 @@
-from base_classes import _JobResult
-from config import base_gams_options, options
-from model_types import ModelType
 from pyomo.environ import SolverFactory
-from solver_library_tools import register_solve_function
+
+from pysperf.base_classes import _JobResult
+from pysperf.config import base_gams_options, options
+from pysperf.model_types import ModelType
+from pysperf.solver_library_tools import register_solve_function
 
 
 @register_solve_function(

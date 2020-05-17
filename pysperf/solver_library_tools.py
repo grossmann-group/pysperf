@@ -4,9 +4,9 @@ from typing import Callable, Optional, Set
 
 import pandas
 
-from base_classes import _JobResult, _TestSolver
-from config import solvers, get_formatted_time_now
-from model_types import ModelType
+from .base_classes import _JobResult, _TestSolver
+from .config import solvers, get_formatted_time_now
+from .model_types import ModelType
 from pyomo.environ import TransformationFactory, ConcreteModel
 
 

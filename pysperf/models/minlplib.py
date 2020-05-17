@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas
 from pyutilib.misc import import_file
 
-from model_library_tools import register_model
+from pysperf.model_library_tools import register_model
 
 minlplibdir = Path(__file__).parent.joinpath("minlplib/")
 

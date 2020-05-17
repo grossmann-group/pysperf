@@ -22,6 +22,7 @@ runsdir.mkdir(exist_ok=True)
 outputdir = Path(__file__).parent.joinpath("output/")
 
 _internal_config_file = Path(__file__).parent.joinpath('.internal.config.pfcache')
+_model_cache_path = Path(__file__).parent.joinpath('model.info.pfcache')
 
 # Load in user and internal options caches
 with Path(__file__).parent.joinpath('pysperf.config').open() as _user_config_file:

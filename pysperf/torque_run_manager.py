@@ -4,7 +4,7 @@ import yaml
 
 from pysperf import options
 from pysperf.model_library import models
-from run_manager import get_run_dir, get_time_limit_with_buffer, this_run_config
+from .run_manager import get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
 def execute_run():
@@ -26,7 +26,9 @@ def execute_run():
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
-            f'-N "pysperf-r{current_run_num}-{jobnum}:{len(jobs)}-t{time_limit}s"',
+            # TODO qsub is very finicky about what -N values it accepts. We will need to experiment with this.
+            # Not high priority, since it is only cosmetic.
+            # f'-N "pysperf-r{current_run_num}-{jobnum}:{len(jobs)}-t{time_limit}s"',
             f"{runner_script.resolve()}"
         ])
 

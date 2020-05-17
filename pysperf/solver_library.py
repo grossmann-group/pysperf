@@ -3,6 +3,6 @@ This file imports `__all__` from the solvers directory, thus populating the solv
 """
 
 from pysperf.solvers import *
-from config import solvers
+from .config import solvers
 
 __all__ = ['solvers']

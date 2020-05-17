@@ -11,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-from config import (
+from pysperf.config import (
     runner_config_filename, job_model_built_filename, job_result_filename, job_solve_done_filename,
     job_start_filename, job_stop_filename, )
 from pysperf import _JobResult, get_formatted_time_now, options
