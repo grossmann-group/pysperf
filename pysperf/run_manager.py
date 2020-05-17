@@ -33,7 +33,7 @@ def setup_new_matrix_run():
     this_run_config.time_limit = options.time_limit
     # TODO check that other options don't need to be cached here
     # create directories and files
-    this_run_dir = make_new_run_dir()
+    this_run_dir = _make_new_run_dir()
     # Make solver/model directories
     for model_name, solver_name in jobs:
         single_job_dir = this_run_dir.joinpath(solver_name, model_name)
@@ -70,7 +70,7 @@ def setup_new_matrix_run():
         yaml.safe_dump(dict(**this_run_config), rundata)
 
 
-def make_new_run_dir() -> Path:
+def _make_new_run_dir() -> Path:
     # Make a new run directory
     rundirs = set(rundir.name for rundir in runsdir.glob("run*/"))
     next_run_num = 1

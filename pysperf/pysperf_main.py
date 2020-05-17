@@ -3,10 +3,10 @@ from argparse import ArgumentParser, FileType
 
 from pyutilib.misc import Container
 
-from model_library_tools import compute_model_stats, list_model_stats
+from model_library_tools import list_model_stats
 from paver_utils.convert_to_paver import create_solu_file
+from pysperf import options
 from run_manager import setup_new_matrix_run, collect_run_info
-from torque_run_manager import execute_run
 from solver_library_tools import list_solver_capabilities
 
 
@@ -28,6 +28,20 @@ def list_solvers(args):
 
 
 def run(args):
+    if args.time_limit:
+        options.time_limit = args.time_limit
+    if args.new:
+        setup_new_matrix_run()
+        if args.run_with == "torque":
+            from torque_run_manager import execute_run
+            execute_run()
+        elif args.runwith == "serial":
+            from serial_run_manager import execute_run
+            execute_run()
+        else:
+            pass
+    elif args.redo:
+        pass
     print(args)
 
 

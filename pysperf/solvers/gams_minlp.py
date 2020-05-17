@@ -19,6 +19,7 @@ def DICOPT(pyomo_model):
         add_options=base_gams_options + [f'option reslim={options.time_limit};']
     )
     job_result.solver_run_time = pyomo_results.solver.user_time
+    job_result.pyomo_solver_status = pyomo_results.solver.status
     job_result.termination_condition = pyomo_results.solver.termination_condition
     job_result.LB = pyomo_results.problem.lower_bound
     job_result.UB = pyomo_results.problem.upper_bound
