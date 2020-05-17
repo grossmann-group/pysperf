@@ -21,8 +21,17 @@ runsdir = Path(__file__).parent.joinpath("output/runs/")
 runsdir.mkdir(exist_ok=True)
 outputdir = Path(__file__).parent.joinpath("output/")
 
+# File paths
+runner_filepath = Path(__file__).parent.joinpath("pysperf_job_runner.py").resolve()
+runner_config_filename = "pysperf_job_runner.config"
+job_result_filename = "pysperf_result.log"
+job_start_filename = ".job_started.log"
+job_stop_filename = ".job_stopped.log"
+job_model_built_filename = ".job_model_built.log"
+job_solve_done_filename = ".job_solve_done.log"
 _internal_config_file = Path(__file__).parent.joinpath('.internal.config.pfcache')
 _model_cache_path = Path(__file__).parent.joinpath('model.info.pfcache')
+run_config_filename = "run.config.pfdata"
 
 # Load in user and internal options caches
 with Path(__file__).parent.joinpath('pysperf.config').open() as _user_config_file:
@@ -46,13 +55,3 @@ time_format = "%Y-%m-%d %X.%f"
 
 def get_formatted_time_now():
     return datetime.now().strftime(time_format)
-
-
-# File paths
-runner_filepath = Path(__file__).parent.joinpath("pysperf_job_runner.py").resolve()
-runner_config_filename = "pysperf_job_runner.config"
-job_result_filename = "pysperf_result.log"
-job_start_filename = ".job_started.log"
-job_stop_filename = ".job_stopped.log"
-job_model_built_filename = ".job_model_built.log"
-job_solve_done_filename = ".job_solve_done.log"

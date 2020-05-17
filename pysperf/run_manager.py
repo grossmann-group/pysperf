@@ -11,13 +11,32 @@ from pyutilib.misc import Container
 
 from .config import (
     cache_internal_options_to_file, job_model_built_filename, job_solve_done_filename, job_stop_filename, options,
-    runner_filepath,
+    run_config_filename, runner_filepath,
     runsdir,
     job_start_filename, )
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 
 this_run_config = Container()
+
+
+def _write_run_config(this_run_dir: Path):
+    with this_run_dir.joinpath(run_config_filename).open('w') as runinfofile:
+        yaml.safe_dump(dict(**this_run_config), runinfofile)
+
+
+def _read_run_config(this_run_dir: Optional[Path] = None):
+    if not this_run_dir:
+        this_run_dir = get_run_dir()
+    with this_run_dir.joinpath(run_config_filename).open('r') as runinfofile:
+        _run_options = yaml.safe_load(runinfofile)
+    this_run_config.update(_run_options)
+    # Convert things from list back to tuple
+    this_run_config.jobs = [(model, solver) for model, solver in this_run_config.jobs]
+    if 'jobs_failed' in this_run_config:
+        this_run_config.jobs_failed = set((model, solver) for model, solver in this_run_config.jobs_failed)
+    if 'jobs_run' in this_run_config:
+        this_run_config.jobs_run = set((model, solver) for model, solver in this_run_config.jobs_run)
 
 
 def setup_new_matrix_run():
@@ -29,6 +48,7 @@ def setup_new_matrix_run():
         if model.model_type in solver.compatible_model_types
     ]
     # Set up run configuration file
+    this_run_config.clear()  # clear existing configurations
     this_run_config.jobs = jobs
     this_run_config.time_limit = options.time_limit
     # TODO check that other options don't need to be cached here
@@ -66,8 +86,7 @@ def setup_new_matrix_run():
 
     # Submit jobs for execution
     cache_internal_options_to_file()
-    with this_run_dir.joinpath("run.config.pfdata").open('w') as rundata:
-        yaml.safe_dump(dict(**this_run_config), rundata)
+    _write_run_config(this_run_dir)
 
 
 def _make_new_run_dir() -> Path:
@@ -105,15 +124,12 @@ def get_time_limit_with_buffer(model_build_time: Optional[int] = 0) -> int:
 
 def collect_run_info(run_number: Optional[int] = None):
     this_run_dir = get_run_dir(run_number)
-    with this_run_dir.joinpath("run.config.pfdata").open('r') as runcache:
-        _run_options = yaml.safe_load(runcache)
-        this_run_config.update(_run_options)
+    _read_run_config(this_run_dir)
     started = set()
     model_built = set()
     solver_done = set()  # Does not mean that solver terminated successfully
     finished = set()
     for job in this_run_config.jobs:
-        job = tuple(job)
         model_name, solver_name = job
         single_job_dir = this_run_dir.joinpath(solver_name, model_name)
         if single_job_dir.joinpath(job_start_filename).exists():
@@ -143,6 +159,7 @@ def collect_run_info(run_number: Optional[int] = None):
     print(f"{len(solver_fails)} solvers had failed executions:")
     for solver_name, failed_list in solver_fails.items():
         print(f" - {solver_name} ({len(failed_list)} failed): {sorted(failed_list)}")
+    # Log the solver failures (Note: this is not the overall errors)
     with this_run_dir.joinpath("solver.failures.log").open('w') as failurelog:
         yaml.safe_dump({k: sorted(v) for k, v in solver_fails.items()}, failurelog, default_flow_style=False)
 
@@ -150,4 +167,22 @@ def collect_run_info(run_number: Optional[int] = None):
     print(f"{len(started - finished)} jobs timed out:")
     for model_name, solver_name in started - finished:
         print(f" - {solver_name} {model_name}")
+
+    # Write failures to run info
+    this_run_config.jobs_failed = started - finished
+    # TODO this should be augmented with solvers with bad termination conditions
+    this_run_config.jobs_run = started
+    _write_run_config(this_run_dir)
+
+
+def export_to_excel(run_number: Optional[int] = None):
+    this_run_dir = get_run_dir(run_number)
+    _read_run_config(this_run_dir)
+    excel_columns = [
+        "time", "model", "solver", "LB", "UB", "elapsed", "iterations",
+        "tc", "sense", "soln_gap", "time_to_ok_soln",
+        "time_to_soln", "opt_gap", "time_to_opt", "err_msg"]
+    rows = []
+    for model_name, solver_name in this_run_config.jobs:
+        pass
 

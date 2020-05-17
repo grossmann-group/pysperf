@@ -19,8 +19,6 @@ def list_models(args):
     print("Computing model statistics... this may take some time.")
     from pysperf.model_library import models
     list_model_stats()
-    if args.make_solu_file:
-        create_solu_file()
 
 
 def list_solvers(args):
@@ -51,14 +49,19 @@ def analyze(args):
     print(args)
 
 
+def export(args):
+    if args.make_solu_file:
+        create_solu_file()
+    print(args)
+
+
 def parse_command_line_arguments_and_run():
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(title="Subcommands")
 
-    list_parser = subparsers.add_parser('list', description='list library elements')
+    list_parser = subparsers.add_parser('list', description='List library elements')
     list_subparsers = list_parser.add_subparsers()
     list_models_parser = list_subparsers.add_parser('models')
-    list_models_parser.add_argument('--make-solu-file', action='store_true', help="Make a Paver *.solu file.")
     list_models_parser.set_defaults(call_function=list_models)
     list_solvers_parser = list_subparsers.add_parser('solvers')
     list_solvers_parser.set_defaults(call_function=list_solvers)
@@ -86,6 +89,11 @@ def parse_command_line_arguments_and_run():
     analyze_parser = subparsers.add_parser('analyze', description="Analyze run results.")
     analyze_parser.set_defaults(call_function=analyze)
     analyze_parser.add_argument('-r', help="Specify a run number.", type=int)
+
+    export_parser = subparsers.add_parser('export', description='Export data or results from pysperf')
+    export_parser.set_defaults(call_function=export)
+    export_parser.add_argument('--make-solu-file', action='store_true', help="Make a Paver *.solu file.")
+    export_parser.add_argument('--to-excel', action='store_true', help="Export results to excel.")
 
     args = parser.parse_args()
     try:
