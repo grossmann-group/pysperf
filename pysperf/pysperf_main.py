@@ -1,12 +1,11 @@
 # Main script
-from argparse import ArgumentParser, FileType
+from argparse import ArgumentParser
 
-from pyutilib.misc import Container
-
+from .analysis import collect_run_info, export_to_excel
+from .config import options
 from .model_library_tools import list_model_stats
 from .paver_utils.convert_to_paver import create_solu_file
-from .config import options
-from .run_manager import export_to_excel, setup_new_matrix_run, collect_run_info
+from .run_manager import setup_new_matrix_run
 from .solver_library_tools import list_solver_capabilities
 
 
@@ -17,7 +16,6 @@ from .solver_library_tools import list_solver_capabilities
 
 def list_models(args):
     print("Computing model statistics... this may take some time.")
-    from pysperf.model_library import models
     list_model_stats()
 
 
