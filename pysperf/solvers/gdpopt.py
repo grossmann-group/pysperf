@@ -25,6 +25,7 @@ def LOA(pyomo_model):
         time_limit=options.time_limit
     )
     job_result.solver_run_time = pyomo_results.solver.timing.total
+    job_result.pyomo_solver_status = pyomo_results.solver.status
     job_result.iterations = pyomo_results.solver.iterations
     job_result.termination_condition = pyomo_results.solver.termination_condition
     job_result.LB = pyomo_results.problem.lower_bound

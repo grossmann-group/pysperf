@@ -7,12 +7,15 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
+from pysperf import _JobResult
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from pyutilib.misc import Container
+from pyomo.environ import TerminationCondition as pyomo_tc, SolverStatus
 
 from .config import (
-    cache_internal_options_to_file, job_model_built_filename, job_solve_done_filename, job_start_filename,
+    cache_internal_options_to_file, job_model_built_filename, job_result_filename, job_solve_done_filename,
+    job_start_filename,
     job_stop_filename, options, run_config_filename, runner_filepath, runsdir, )
 
 this_run_config = Container()
@@ -172,10 +175,23 @@ def collect_run_info(run_number: Optional[int] = None):
         print(f" - {solver_name} {model_name}")
 
     # Write failures to run info
-    this_run_config.jobs_failed = started - solver_done
+    this_run_config.jobs_failed = finished - solver_done
     # TODO this should be augmented with solvers with bad termination conditions
-    this_run_config.jobs_run = started
+    this_run_config.jobs_run = finished
     _write_run_config(this_run_dir)
+
+
+def _get_job_result(run_dir: Path, model: str, solver: str):
+    with run_dir.joinpath(solver, model, job_result_filename).open('r') as result_file:
+        _stored_result = yaml.safe_load(result_file)
+    if not _stored_result:
+        return _JobResult()
+    job_result = _JobResult(**_stored_result)
+    if 'termination_condition' in job_result:
+        job_result.termination_condition = pyomo_tc(job_result.termination_condition)
+    if 'pyomo_solver_status' in job_result:
+        job_result.pyomo_solver_status = SolverStatus(job_result.pyomo_solver_status)
+    return job_result
 
 
 def export_to_excel(run_number: Optional[int] = None):
@@ -186,6 +202,15 @@ def export_to_excel(run_number: Optional[int] = None):
         "tc", "sense", "soln_gap", "time_to_ok_soln",
         "time_to_soln", "opt_gap", "time_to_opt", "err_msg"]
     rows = []
-    for model_name, solver_name in this_run_config.jobs:
-        pass
+    for job in this_run_config.jobs_run:
+        model_name, solver_name = job
+        test_model = models[model_name]
+        test_solver = solvers[solver_name]
+        job_data = Container()
+        if job not in this_run_config.jobs_failed:
+            test_result = _get_job_result(this_run_dir, model_name, solver_name)
+            if test_result:
+                print(test_result)
+                break
+        # job_data.time = test_result.model_build_start_time
 

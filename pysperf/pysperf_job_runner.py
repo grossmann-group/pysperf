@@ -48,8 +48,8 @@ def run_test_case():
     with open(job_result_filename, 'w') as result_file:
         if 'termination_condition' in job_result:
             job_result.termination_condition = str(job_result.termination_condition)
-        if 'pyomo_solve_status' in job_result:
-            job_result.pyomo_solve_status = str(job_result.pyomo_solve_status)
+        if 'pyomo_solver_status' in job_result:
+            job_result.pyomo_solver_status = str(job_result.pyomo_solver_status)
         yaml.safe_dump(dict(**job_result), result_file)
 
 
