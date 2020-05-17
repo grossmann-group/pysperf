@@ -33,10 +33,10 @@ def run(args):
     if args.new:
         setup_new_matrix_run()
         if args.run_with == "torque":
-            from torque_run_manager import execute_run
+            from .torque_run_manager import execute_run
             execute_run()
         elif args.run_with == "serial":
-            from serial_run_manager import execute_run
+            from .serial_run_manager import execute_run
             execute_run()
         else:
             pass
