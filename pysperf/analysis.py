@@ -2,6 +2,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Optional, Tuple
 
+import openpyxl
 import pandas
 import yaml
 from pyomo.environ import SolverStatus, TerminationCondition as pyomo_tc
@@ -12,12 +13,15 @@ from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from .base_classes import _TestModel, _TestSolver
 from .config import (
-    job_model_built_filename, job_result_filename, job_solve_done_filename, job_start_filename,
+    cache_internal_options_to_file, job_model_built_filename, job_result_filename, job_solve_done_filename,
+    job_start_filename,
     job_stop_filename, options, outputdir, )
 from .run_manager import _load_run_config, _write_run_config, get_run_dir, this_run_config
 
 
 def collect_run_info(run_number: Optional[int] = None):
+    if run_number:
+        options['current run number'] = run_number
     this_run_dir = get_run_dir(run_number)
     _load_run_config(this_run_dir)
     started = set()
@@ -67,12 +71,13 @@ def collect_run_info(run_number: Optional[int] = None):
     for model_name, solver_name in started - finished:
         print(f" - {solver_name} {model_name}")
 
-    # Write sets to
+    # Write sets to files
     this_run_config.jobs_failed = finished - solver_done
     # TODO jobs_failed should be augmented with solvers with bad termination conditions
     this_run_config.jobs_run = finished
     # TODO jobs_run might be adjusted to remove jobs that wrote an empty results object?
     _write_run_config(this_run_dir)
+    cache_internal_options_to_file()
 
 
 def _get_job_result(run_dir: Path, model: str, solver: str):
@@ -82,7 +87,10 @@ def _get_job_result(run_dir: Path, model: str, solver: str):
         return _JobResult()
     job_result = _JobResult(**_stored_result)
     if 'termination_condition' in job_result:
-        job_result.termination_condition = pyomo_tc(job_result.termination_condition)
+        if job_result.termination_condition not in [None, "None"]:
+            job_result.termination_condition = pyomo_tc(job_result.termination_condition)
+        else:
+            job_result.termination_condition = pyomo_tc('unknown')
     if 'pyomo_solver_status' in job_result:
         job_result.pyomo_solver_status = SolverStatus(job_result.pyomo_solver_status)
     return job_result
@@ -131,7 +139,7 @@ def export_to_excel(run_number: Optional[int] = None):
             job_data.time_to_soln = float('inf')
             job_data.time_to_ok_soln = float('inf')
 
-        if job_data.opt_gap is not None and job_data.opt_gap <= options["optimality tolerance"]:
+        if job_data.opt_gap is not None and job_data.opt_gap <= options.optcr + options['optcr tolerance']:
             job_data.time_to_opt = test_result.solver_run_time
         else:
             job_data.time_to_opt = float('inf')
@@ -144,6 +152,23 @@ def export_to_excel(run_number: Optional[int] = None):
         [float('inf'), float('-inf')], [None, None])
     with pandas.ExcelWriter(str(outputdir.joinpath("results.xlsx"))) as writer:
         df.to_excel(writer, sheet_name="data")
+    _autoformat_excel()
+
+
+def _autoformat_excel():
+    # autoformat Excel sheet
+    wb = openpyxl.load_workbook(outputdir.joinpath("results.xlsx").open('rb'))
+    worksheet = wb.active
+    for col in worksheet.columns:
+        max_length = 0
+        column = col[0].column_letter  # Get the column name
+        for cell in col:
+            if len(str(cell.value)) > max_length:
+                max_length = len(str(cell.value))
+        adjusted_width = (max_length + 2) * 1.05
+        worksheet.column_dimensions[column].width = adjusted_width
+    worksheet.freeze_panes = 'A2'
+    wb.save(outputdir.joinpath("results.xlsx").open('wb'))
 
 
 def _calculate_gaps(test_model: _TestModel, test_solver: _TestSolver, lb: float, ub: float) -> Tuple[float, float]:
