@@ -117,7 +117,7 @@ def export_to_excel(run_number: Optional[int] = None):
             job_data.soln_gap, job_data.opt_gap = None, None
 
         # Times to solution/optimality
-        if job_data.soln_gap is not None and job_data.soln_gap <= options["optimality tolerance"]:
+        if job_data.soln_gap is not None and job_data.soln_gap <= options.optcr + options['optcr tolerance']:
             job_data.time_to_soln = test_result.solver_run_time
             job_data.time_to_ok_soln = test_result.solver_run_time
         elif job_data.soln_gap is not None and job_data.soln_gap <= options["ok solution tolerance"]:

@@ -1,13 +1,14 @@
 from pyomo.environ import SolverFactory
 
 from pysperf.base_classes import _JobResult
-from pysperf.config import base_gams_options, options
+from pysperf.config import get_base_gams_options_list, options
 from pysperf.model_types import ModelType
 from pysperf.solver_library_tools import register_solve_function
 
 
 @register_solve_function(
     name="GDPopt-LOA",
+    milp='cplex', nlp='ipopth',
     compatible_model_types={ModelType.GDP, ModelType.DP},
     global_for_model_types={ModelType.cvxGDP, ModelType.DP})
 def LOA(pyomo_model):
@@ -16,11 +17,11 @@ def LOA(pyomo_model):
         pyomo_model,
         tee=True,
         mip_solver='gams',
-        mip_solver_args=dict(solver='cplex', add_options=base_gams_options),
+        mip_solver_args=dict(solver='cplex', add_options=get_base_gams_options_list()),
         nlp_solver='gams',
-        nlp_solver_args=dict(solver='ipopth', add_options=base_gams_options),
+        nlp_solver_args=dict(solver='ipopth', add_options=get_base_gams_options_list()),
         minlp_solver='gams',
-        minlp_solver_args=dict(solver='dicopt', add_options=base_gams_options),
+        minlp_solver_args=dict(solver='dicopt', add_options=get_base_gams_options_list()),
         iterlim=300,
         time_limit=options.time_limit
     )

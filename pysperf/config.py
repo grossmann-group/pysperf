@@ -10,12 +10,6 @@ models = Container()
 solvers = Container()
 options = Container()
 
-base_gams_options = [
-    'option optcr=0.01;',
-    'option optca=0;',
-    'option solvelink=5;'
-]
-
 # Make output and runs directories, if they do not exist
 runsdir = Path(__file__).parent.joinpath("output/runs/")
 runsdir.mkdir(exist_ok=True)
@@ -48,6 +42,14 @@ def cache_internal_options_to_file() -> None:
     _internal_config_options = {k: v for k, v in options.items() if k not in _user_options}
     with _internal_config_file.open('w') as _internal_config_filehandle:
         yaml.safe_dump(_internal_config_options, _internal_config_filehandle)
+
+
+def get_base_gams_options_list() -> list:
+    return [
+        f'option optcr={options.optcr};',
+        'option optca=0;',
+        'option solvelink=5;'
+    ]
 
 
 time_format = "%Y-%m-%d %X.%f"
