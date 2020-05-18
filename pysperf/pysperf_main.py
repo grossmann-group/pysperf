@@ -1,5 +1,7 @@
 # Main script
+import subprocess
 from argparse import ArgumentParser
+from pathlib import Path
 
 from .analysis import collect_run_info, export_to_excel
 from .config import options, runsdir
@@ -73,6 +75,12 @@ def export(args):
     print(args)
 
 
+def update_self(args):
+    print("This is a convenience function. Developer use only.")
+    subprocess.run(['git pull'], shell=True, cwd=Path(__file__).parent.resolve())
+    subprocess.run(['git branch -vvv'], shell=True, cwd=Path(__file__).parent.resolve())
+
+
 def parse_command_line_arguments_and_run():
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(title="Subcommands")
@@ -116,6 +124,10 @@ def parse_command_line_arguments_and_run():
     export_parser.add_argument('--make-trace-file', action='store_true', help="Make a Paver *.trc file.")
     export_parser.add_argument('--to-excel', action='store_true', help="Export results to excel.")
     export_parser.add_argument('-r', help="Specify a run number.", type=int)
+
+    update_parser = subparsers.add_parser(
+        'update', description='Update pysperf source. [WARNING: Developer tool only].')
+    update_parser.set_defaults(call_function=update_self)
 
     args = parser.parse_args()
     try:
