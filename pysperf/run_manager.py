@@ -26,7 +26,7 @@ def _write_run_config(this_run_dir: Path):
         yaml.safe_dump(dict(**config_to_store), runinfofile)
 
 
-def _read_run_config(this_run_dir: Optional[Path] = None):
+def _load_run_config(this_run_dir: Optional[Path] = None):
     if not this_run_dir:
         this_run_dir = get_run_dir()
     with this_run_dir.joinpath(run_config_filename).open('r') as runinfofile:
@@ -51,6 +51,7 @@ def setup_new_matrix_run() -> None:
     # Set up run configuration file
     this_run_config.clear()  # clear existing configurations
     this_run_config.jobs = jobs
+    this_run_config.jobs_to_run = jobs  # This will be different for re-runs
     this_run_config.time_limit = options.time_limit
     # TODO check that other options don't need to be cached here
     # create directories and files
@@ -90,18 +91,40 @@ def setup_new_matrix_run() -> None:
     _write_run_config(this_run_dir)
 
 
-def setup_redo_matrix_run(run_number: Optional[int] = None) -> None:
-    pass
+def setup_redo_matrix_run(run_number: Optional[int] = None,
+                          redo_existing: Optional[bool] = False,
+                          redo_failed: Optional[bool] = False) -> None:
+    if run_number:
+        options["current run number"] = run_number
+    this_run_dir = get_run_dir(run_number)
+    _load_run_config(this_run_dir)
+
+    existing_jobs_to_skip = set() if redo_existing else this_run_config.jobs_run
+    failed_jobs_to_skip = set() if redo_failed else this_run_config.jobs_failed
+
+    this_run_config.jobs_to_run = [
+        job for job in this_run_config.jobs
+        if job not in existing_jobs_to_skip and job not in failed_jobs_to_skip
+    ]
+
+    # Submit jobs for execution
+    cache_internal_options_to_file()
+    _write_run_config(this_run_dir)
 
 
-def _make_new_run_dir() -> Path:
-    # Make a new run directory
-    rundirs = set(rundir.name for rundir in runsdir.glob("run*/"))
-    next_run_num = 1
-    next_run_dir = f"run{next_run_num}"
-    while next_run_dir in rundirs:
-        next_run_num += 1
+def _make_new_run_dir(run_number: Optional[int] = None) -> Path:
+    if run_number:
+        # The user specified a run number. Use it.
+        next_run_num = run_number
+        next_run_dir = f"run{run_number}"
+    else:
+        # Get the lowest currently available run number.
+        rundirs = set(rundir.name for rundir in runsdir.glob("run*/"))
+        next_run_num = 1
         next_run_dir = f"run{next_run_num}"
+        while next_run_dir in rundirs:
+            next_run_num += 1
+            next_run_dir = f"run{next_run_num}"
     this_run_dir = runsdir.joinpath(next_run_dir)
     this_run_dir.mkdir(exist_ok=False)
     options["current run number"] = next_run_num

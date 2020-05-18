@@ -12,7 +12,7 @@ from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from pysperf.paver_utils.julian import get_julian_datetime
 from pysperf.paver_utils.parse_to_gams import solver_status_to_gams, termination_condition_to_gams_format
-from pysperf.run_manager import _read_run_config, get_run_dir, this_run_config
+from pysperf.run_manager import _load_run_config, get_run_dir, this_run_config
 
 
 def create_solu_file() -> None:
@@ -30,7 +30,7 @@ def create_solu_file() -> None:
 
 def create_paver_tracefile(run_number: Optional[int] = None):
     this_run_dir = get_run_dir(run_number)
-    _read_run_config(this_run_dir)
+    _load_run_config(this_run_dir)
     # Create trace file
     trace_header = """\
         * Trace Record Definition

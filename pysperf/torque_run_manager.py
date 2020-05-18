@@ -4,14 +4,14 @@ import yaml
 
 from pysperf import options
 from pysperf.model_library import models
-from .run_manager import _read_run_config, get_run_dir, get_time_limit_with_buffer, this_run_config
+from .run_manager import _load_run_config, get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
 def execute_run():
     # Read in config
     # Start executing the *.sh files
     this_run_dir = get_run_dir()
-    _read_run_config(this_run_dir)
+    _load_run_config(this_run_dir)
     jobs = this_run_config.jobs
     for jobnum, (model_name, solver_name) in enumerate(jobs, start=1):
         current_run_num = options["current run number"]

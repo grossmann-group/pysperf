@@ -14,12 +14,12 @@ from .base_classes import _TestModel, _TestSolver
 from .config import (
     job_model_built_filename, job_result_filename, job_solve_done_filename, job_start_filename,
     job_stop_filename, options, outputdir, )
-from .run_manager import _read_run_config, _write_run_config, get_run_dir, this_run_config
+from .run_manager import _load_run_config, _write_run_config, get_run_dir, this_run_config
 
 
 def collect_run_info(run_number: Optional[int] = None):
     this_run_dir = get_run_dir(run_number)
-    _read_run_config(this_run_dir)
+    _load_run_config(this_run_dir)
     started = set()
     model_built = set()
     solver_done = set()  # Does not mean that solver terminated successfully
@@ -63,10 +63,11 @@ def collect_run_info(run_number: Optional[int] = None):
     for model_name, solver_name in started - finished:
         print(f" - {solver_name} {model_name}")
 
-    # Write failures to run info
+    # Write sets to
     this_run_config.jobs_failed = finished - solver_done
-    # TODO this should be augmented with solvers with bad termination conditions
+    # TODO jobs_failed should be augmented with solvers with bad termination conditions
     this_run_config.jobs_run = finished
+    # TODO jobs_run might be adjusted to remove jobs that wrote an empty results object?
     _write_run_config(this_run_dir)
 
 
@@ -85,7 +86,7 @@ def _get_job_result(run_dir: Path, model: str, solver: str):
 
 def export_to_excel(run_number: Optional[int] = None):
     this_run_dir = get_run_dir(run_number)
-    _read_run_config(this_run_dir)
+    _load_run_config(this_run_dir)
     excel_columns = [
         "time", "model", "solver", "LB", "UB", "elapsed", "iterations",
         "tc", "sense", "soln_gap", "time_to_ok_soln",

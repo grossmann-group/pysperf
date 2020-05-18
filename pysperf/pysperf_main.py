@@ -5,7 +5,7 @@ from .analysis import collect_run_info, export_to_excel
 from .config import options, runsdir
 from .model_library_tools import list_model_stats
 from .paver_utils.convert_to_paver import create_paver_tracefile, create_solu_file
-from .run_manager import setup_new_matrix_run
+from .run_manager import setup_new_matrix_run, setup_redo_matrix_run
 from .solver_library_tools import list_solver_capabilities
 
 
@@ -33,17 +33,25 @@ def list_runs(args):
 def run(args):
     if args.time_limit:
         options.time_limit = args.time_limit
+    run_number = args.r
+
+    if any([args.models, args.solvers, args.model_types]):
+        raise NotImplementedError()
+
+    # Perform setup
     if args.new:
         setup_new_matrix_run()
-        if args.run_with == "torque":
-            from .torque_run_manager import execute_run
-            execute_run()
-        elif args.run_with == "serial":
-            from .serial_run_manager import execute_run
-            execute_run()
-        else:
-            pass
     elif args.redo:
+        setup_redo_matrix_run(run_number, args.redo_existing, args.redo_failed)
+
+    # Do the actual run
+    if args.run_with == "torque":
+        from .torque_run_manager import execute_run
+        execute_run()
+    elif args.run_with == "serial":
+        from .serial_run_manager import execute_run
+        execute_run()
+    else:
         pass
     print(args)
 
