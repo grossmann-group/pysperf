@@ -3,6 +3,9 @@ Pyomo Solver Performance Analysis Library
 
 
 ## Example commands:
+
+To use the commands below (Unix), you must put a python script that imports `parse_command_line_arguments_and_run()` from `pysperf.pysperf_main.py` in your path. Otherwise, you will need to type `python pysperf_main.py list models` and so on.
+
 ### Listing library elements
 - `pysperf list models`
 - `pysperf list solvers`
