@@ -37,7 +37,8 @@ def collect_run_info(run_number: Optional[int] = None):
             finished.add(job)
 
     # Total jobs executed
-    print(f"{len(started)} of {len(this_run_config.jobs)} jobs executed. Jobs never executed:")
+    print(f"{len(started)} of {len(this_run_config.jobs)} jobs executed. "
+          f"{len(this_run_config.jobs) - len(started)} jobs never executed:")
     for model_name, solver_name in this_run_config.jobs:
         if (model_name, solver_name) not in started:
             print(f" - {model_name} {solver_name}")
