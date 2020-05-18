@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from .analysis import collect_run_info, export_to_excel
 from .config import options, runsdir
 from .model_library_tools import list_model_stats
-from .paver_utils.convert_to_paver import create_solu_file
+from .paver_utils.convert_to_paver import create_paver_tracefile, create_solu_file
 from .run_manager import setup_new_matrix_run
 from .solver_library_tools import list_solver_capabilities
 
@@ -58,6 +58,8 @@ def export(args):
     run_number = args.r
     if args.make_solu_file:
         create_solu_file()
+    if args.make_trace_file:
+        create_paver_tracefile(run_number)
     if args.to_excel:
         export_to_excel(run_number)
     print(args)
@@ -103,6 +105,7 @@ def parse_command_line_arguments_and_run():
     export_parser = subparsers.add_parser('export', description='Export data or results from pysperf')
     export_parser.set_defaults(call_function=export)
     export_parser.add_argument('--make-solu-file', action='store_true', help="Make a Paver *.solu file.")
+    export_parser.add_argument('--make-trace-file', action='store_true', help="Make a Paver *.trc file.")
     export_parser.add_argument('--to-excel', action='store_true', help="Export results to excel.")
     export_parser.add_argument('-r', help="Specify a run number.", type=int)
 

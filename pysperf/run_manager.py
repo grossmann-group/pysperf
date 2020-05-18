@@ -40,7 +40,7 @@ def _read_run_config(this_run_dir: Optional[Path] = None):
         this_run_config.jobs_run = set((model, solver) for model, solver in this_run_config.jobs_run)
 
 
-def setup_new_matrix_run():
+def setup_new_matrix_run() -> None:
     # create matrix of jobs to run
     jobs = [
         (model_name, solver_name)
@@ -88,6 +88,10 @@ def setup_new_matrix_run():
     # Submit jobs for execution
     cache_internal_options_to_file()
     _write_run_config(this_run_dir)
+
+
+def setup_redo_matrix_run(run_number: Optional[int] = None) -> None:
+    pass
 
 
 def _make_new_run_dir() -> Path:

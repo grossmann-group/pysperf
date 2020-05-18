@@ -12,6 +12,7 @@ from pyomo.environ import TransformationFactory, ConcreteModel
 
 def register_solver(
         name: str, solve_function: Callable[[ConcreteModel], _JobResult],
+        milp: Optional[str] = None, nlp: Optional[str] = None,
         compatible_model_types: Optional[Set[ModelType]] = None,
         global_for_model_types: Optional[Set[ModelType]] = None) -> None:
     if name in solvers:
@@ -19,6 +20,8 @@ def register_solver(
     new_solver = _TestSolver()
     new_solver.name = name
     new_solver.solve_function = solve_function
+    new_solver.milp = milp
+    new_solver.nlp = nlp
     new_solver.compatible_model_types = compatible_model_types if compatible_model_types else set()
     new_solver.global_for_model_types = global_for_model_types if global_for_model_types else set()
     solvers[name] = new_solver
@@ -27,15 +30,22 @@ def register_solver(
 def register_solve_function(
         name: Optional[str] = None,
         compatible_model_types: Optional[Set[ModelType]] = None,
+        milp: Optional[str] = None, nlp: Optional[str] = None,
         global_for_model_types: Optional[Set[ModelType]] = None) -> Callable:
     def anon_decorator(solve_function):
         register_solver(solve_function.__name__, solve_function, compatible_model_types, global_for_model_types)
+        # Pass information to the register_GDP_reformulations decorator, if needed
+        solve_function._milp = milp
+        solve_function._nlp = nlp
         solve_function._compat_mtypes = compatible_model_types
         solve_function._global_mtypes = global_for_model_types
         return solve_function
 
     def named_decorator(solve_function):
         register_solver(name, solve_function, compatible_model_types, global_for_model_types)
+        # Pass information to the register_GDP_reformulations decorator, if needed
+        solve_function._milp = milp
+        solve_function._nlp = nlp
         solve_function._compat_mtypes = compatible_model_types
         solve_function._global_mtypes = global_for_model_types
         return solve_function
@@ -75,6 +85,8 @@ def register_GDP_reformulations(mip_solve_function):
         register_solver(
             name=mip_solve_function.__name__ + "-" + xfrm_name,
             solve_function=get_solve_function_with_xfrm(xfrm),
+            milp=mip_solve_function._milp,
+            nlp=mip_solve_function._nlp,
             compatible_model_types=gdp_compatible_mtypes,
             global_for_model_types=gdp_global_mtypes,
         )

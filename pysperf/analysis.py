@@ -7,13 +7,13 @@ import yaml
 from pyomo.environ import SolverStatus, TerminationCondition as pyomo_tc
 from pyutilib.misc import Container
 
-from .base_classes import _TestModel, _TestSolver
 from pysperf import _JobResult
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
+from .base_classes import _TestModel, _TestSolver
 from .config import (
     job_model_built_filename, job_result_filename, job_solve_done_filename, job_start_filename,
-    job_stop_filename, options, runsdir, )
+    job_stop_filename, options, outputdir, )
 from .run_manager import _read_run_config, _write_run_config, get_run_dir, this_run_config
 
 
@@ -137,7 +137,7 @@ def export_to_excel(run_number: Optional[int] = None):
         rows, columns=excel_columns
     ).replace(  # replace infinity with empty cells
         [float('inf'), float('-inf')], [None, None])
-    with pandas.ExcelWriter(str(runsdir.joinpath("results.xlsx"))) as writer:
+    with pandas.ExcelWriter(str(outputdir.joinpath("results.xlsx"))) as writer:
         df.to_excel(writer, sheet_name="data")
 
 

@@ -1,6 +1,7 @@
 import csv
 import textwrap
 from datetime import datetime
+from typing import Optional
 
 import pyomo.environ as pyo
 import yaml
@@ -8,8 +9,10 @@ import yaml
 from pysperf import _JobResult
 from pysperf.config import outputdir, time_format
 from pysperf.model_library import models
+from pysperf.solver_library import solvers
 from pysperf.paver_utils.julian import get_julian_datetime
 from pysperf.paver_utils.parse_to_gams import solver_status_to_gams, termination_condition_to_gams_format
+from pysperf.run_manager import _read_run_config, get_run_dir, this_run_config
 
 
 def create_solu_file() -> None:
@@ -25,7 +28,9 @@ def create_solu_file() -> None:
             print(f"{soln_type}\t{test_model.name}\t{soln_value}", file=solufile)
 
 
-def create_paver_tracefile(this_run_dir, finished):
+def create_paver_tracefile(run_number: Optional[int] = None):
+    this_run_dir = get_run_dir(run_number)
+    _read_run_config(this_run_dir)
     # Create trace file
     trace_header = """\
         * Trace Record Definition
@@ -34,17 +39,18 @@ def create_paver_tracefile(this_run_dir, finished):
         * ModelStatus,SolverStatus,ObjectiveValue,ObjectiveValueEstimate,SolverTime,ETSolver,NumberOfIterations,NumberOfNodes
         """
     trace_data = []
-    for model_name, solver_name in finished:
+    for model_name, solver_name in this_run_config.jobs_run - this_run_config.jobs_failed:
         with this_run_dir.joinpath(solver_name, model_name, "pysperf_result.log").open('r') as resultfile:
             job_result = _JobResult(**yaml.safe_load(resultfile))
         _validate_job_result(job_result)
         test_model = models[model_name]
+        test_solver = solvers[solver_name]
         trace_line = [
             model_name,  # Model Name
             'MINLP',  # LP, MIP, NLP, etc.
             solver_name,  # ...
-            'blank',  # default NLP solver
-            'blank',  # default MIP solver
+            test_solver.nlp,  # default NLP solver
+            test_solver.milp,  # default MIP solver
             get_julian_datetime(datetime.strptime(
                 job_result.model_build_start_time, time_format)),  # start day/time of job
             0 if test_model.objective_sense == "minimize" else 1,  # direction 0=min, 1=max
@@ -67,7 +73,7 @@ def create_paver_tracefile(this_run_dir, finished):
         ]
         trace_data.append(trace_line)
 
-    with this_run_dir.joinpath("results.trc").open('w') as tracefile:
+    with outputdir.joinpath("results.trc").open('w') as tracefile:
         tracefile.write(textwrap.dedent(trace_header))
         tracefile.write('*\n')
         csvwriter = csv.writer(tracefile)
