@@ -76,7 +76,7 @@ def export(args):
 
 
 def update_self(args):
-    print("This is a convenience function. Developer use only.")
+    print("WARNING: This is a convenience function. Developer use only.")
     subprocess.run(['git pull'], shell=True, cwd=Path(__file__).parent.resolve())
     subprocess.run(['git branch -vvv'], shell=True, cwd=Path(__file__).parent.resolve())
 
