@@ -2,7 +2,7 @@
 from argparse import ArgumentParser
 
 from .analysis import collect_run_info, export_to_excel
-from .config import options
+from .config import options, runsdir
 from .model_library_tools import list_model_stats
 from .paver_utils.convert_to_paver import create_solu_file
 from .run_manager import setup_new_matrix_run
@@ -21,6 +21,13 @@ def list_models(args):
 
 def list_solvers(args):
     list_solver_capabilities()
+
+
+def list_runs(args):
+    print("Runs directory contains:")
+    runs_list = [str(path) for path in runsdir.glob("run*/") if path.is_dir()]
+    for rundir in sorted(runs_list, key=lambda x: (len(x), x)):
+        print(rundir)
 
 
 def run(args):
@@ -66,6 +73,8 @@ def parse_command_line_arguments_and_run():
     list_models_parser.set_defaults(call_function=list_models)
     list_solvers_parser = list_subparsers.add_parser('solvers')
     list_solvers_parser.set_defaults(call_function=list_solvers)
+    list_runs_parser = list_subparsers.add_parser('runs')
+    list_runs_parser.set_defaults(call_function=list_runs)
 
     run_parser = subparsers.add_parser('run', description='perform a benchmarking run')
     run_parser.set_defaults(call_function=run)
