@@ -12,7 +12,7 @@ options = Container()
 
 # Make output and runs directories, if they do not exist
 runsdir = Path(__file__).parent.joinpath("output/runs/")
-runsdir.mkdir(exist_ok=True)
+runsdir.mkdir(exist_ok=True, parents=True)
 outputdir = Path(__file__).parent.joinpath("output/")
 
 # File paths
