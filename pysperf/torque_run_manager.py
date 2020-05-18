@@ -12,7 +12,7 @@ def execute_run():
     # Start executing the *.sh files
     this_run_dir = get_run_dir()
     _load_run_config(this_run_dir)
-    jobs = this_run_config.jobs
+    jobs = this_run_config.jobs_to_run
     for jobnum, (model_name, solver_name) in enumerate(jobs, start=1):
         current_run_num = options["current run number"]
         print(f"Submitting run {current_run_num}-{jobnum}/{len(jobs)}: Solver {solver_name} with model {model_name}.")
