@@ -83,11 +83,17 @@ def register_model_builder(
 def compute_model_stats():
     models_loaded_from_cache = _load_from_model_stats_cache()
 
+    _failed_model_names = []
     for test_model in models.values():
         if test_model.name in models_loaded_from_cache:
             continue
         build_start_time = monotonic()
-        pyomo_model = test_model.build_function()
+        try:
+            pyomo_model = test_model.build_function()
+        except Exception as err:
+            print(f"Failed to build {test_model.name} due to exception: {err}.")
+            print("Temporarily removing model from library.")
+            _failed_model_names.append(test_model.name)
         build_end_time = monotonic()
         test_model.build_time = int(ceil(build_end_time - build_start_time))
         size_report = build_model_size_report(pyomo_model)
@@ -98,6 +104,9 @@ def compute_model_stats():
         # Determine objective sense
         active_obj = next(pyomo_model.component_data_objects(pyo.Objective, active=True))
         test_model.objective_sense = 'minimize' if active_obj.sense == pyo.minimize else 'maximize'
+
+    for failed_model in _failed_model_names:
+        del models[failed_model]
 
     # Cache the model stats
     _cache_model_stats()
