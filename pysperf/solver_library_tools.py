@@ -29,11 +29,13 @@ def register_solver(
 
 def register_solve_function(
         name: Optional[str] = None,
-        compatible_model_types: Optional[Set[ModelType]] = None,
         milp: Optional[str] = None, nlp: Optional[str] = None,
+        compatible_model_types: Optional[Set[ModelType]] = None,
         global_for_model_types: Optional[Set[ModelType]] = None) -> Callable:
     def anon_decorator(solve_function):
-        register_solver(solve_function.__name__, solve_function, compatible_model_types, global_for_model_types)
+        register_solver(solve_function.__name__, solve_function,
+                        milp, nlp,
+                        compatible_model_types, global_for_model_types)
         # Pass information to the register_GDP_reformulations decorator, if needed
         solve_function._milp = milp
         solve_function._nlp = nlp
@@ -42,7 +44,9 @@ def register_solve_function(
         return solve_function
 
     def named_decorator(solve_function):
-        register_solver(name, solve_function, compatible_model_types, global_for_model_types)
+        register_solver(name, solve_function,
+                        milp, nlp,
+                        compatible_model_types, global_for_model_types)
         # Pass information to the register_GDP_reformulations decorator, if needed
         solve_function._milp = milp
         solve_function._nlp = nlp
