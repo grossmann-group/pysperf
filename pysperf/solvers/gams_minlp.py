@@ -15,7 +15,7 @@ def DICOPT(pyomo_model):
     pyomo_results = SolverFactory('gams').solve(
         pyomo_model,
         tee=True,
-        keepfiles=True,
+        # keepfiles=True,
         solver='dicopt',
         add_options=get_base_gams_options_list() + [f'option reslim={options.time_limit};']
     )
@@ -36,7 +36,7 @@ def BARON(pyomo_model):
     pyomo_results = SolverFactory('gams').solve(
         pyomo_model,
         tee=True,
-        keepfiles=True,
+        # keepfiles=True,
         solver='baron',
         add_options=get_base_gams_options_list() + [f'option reslim={options.time_limit};']
     )
@@ -57,7 +57,7 @@ def SCIP(pyomo_model):
     pyomo_results = SolverFactory('gams').solve(
         pyomo_model,
         tee=True,
-        keepfiles=True,
+        # keepfiles=True,
         solver='scip',
         add_options=get_base_gams_options_list() + [f'option reslim={options.time_limit};']
     )
