@@ -8,8 +8,8 @@ from pysperf.solver_library_tools import register_solve_function
 
 @register_solve_function(
     name="GDPopt-LOA",
-    compatible_model_types={ModelType.GDP},
-    global_for_model_types={ModelType.cvxGDP})
+    compatible_model_types={ModelType.GDP, ModelType.DP},
+    global_for_model_types={ModelType.cvxGDP, ModelType.DP})
 def LOA(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gdpopt').solve(
