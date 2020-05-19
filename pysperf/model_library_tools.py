@@ -94,6 +94,7 @@ def compute_model_stats():
             print(f"Failed to build {test_model.name} due to exception: {err}.")
             print("Temporarily removing model from library.")
             _failed_model_names.append(test_model.name)
+            continue
         build_end_time = monotonic()
         test_model.build_time = int(ceil(build_end_time - build_start_time))
         size_report = build_model_size_report(pyomo_model)
