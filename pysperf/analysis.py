@@ -67,7 +67,7 @@ def collect_run_info(run_number: Optional[int] = None):
         yaml.safe_dump({k: sorted(v) for k, v in solver_fails.items()}, failurelog, default_flow_style=False)
 
     # Timeouts and other errors
-    print(f"{len(started - finished)} jobs timed out:")
+    print(f"{len(started - finished)} jobs timed out or still running:")
     for model_name, solver_name in started - finished:
         print(f" - {solver_name} {model_name}")
 
