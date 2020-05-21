@@ -51,7 +51,7 @@ def setup_new_matrix_run(model_set: Set[str] = (),
         assert solver_name in solvers, f"{solver_name} is not in the solver library."
     valid_model_names = model_set if model_set else models.keys()
     valid_solver_names = solver_set if solver_set else solvers.keys()
-    valid_model_types = {ModelType[mtype] for mtype in model_type_set}
+    valid_model_types = {ModelType[mtype] for mtype in model_type_set} if model_type_set else ModelType
     # create matrix of jobs to run
     jobs = [
         (model_name, solver_name)
@@ -119,7 +119,7 @@ def setup_redo_matrix_run(run_number: Optional[int] = None,
         assert solver_name in solvers, f"{solver_name} is not in the solver library."
     valid_model_names = model_set if model_set else models.keys()
     valid_solver_names = solver_set if solver_set else solvers.keys()
-    valid_model_types = {ModelType[mtype] for mtype in model_type_set}
+    valid_model_types = {ModelType[mtype] for mtype in model_type_set} if model_type_set else ModelType
 
     # Handle run number
     if run_number:
