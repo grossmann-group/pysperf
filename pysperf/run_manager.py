@@ -3,11 +3,12 @@ import sys
 import textwrap
 from math import ceil
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Set
 
 import yaml
 from pyutilib.misc import Container
 
+from .model_types import ModelType
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from .config import (
@@ -40,13 +41,26 @@ def _load_run_config(this_run_dir: Optional[Path] = None):
         this_run_config.jobs_run = set((model, solver) for model, solver in this_run_config.jobs_run)
 
 
-def setup_new_matrix_run() -> None:
+def setup_new_matrix_run(model_set: Set[str] = (),
+                         solver_set: Set[str] = (),
+                         model_type_set: Set[str] = ()) -> None:
+    # Validate inputs
+    for model_name in model_set:
+        assert model_name in models, f"{model_name} is not in the model library."
+    for solver_name in solver_set:
+        assert solver_name in solvers, f"{solver_name} is not in the solver library."
+    valid_model_names = model_set if model_set else models.keys()
+    valid_solver_names = solver_set if solver_set else solvers.keys()
+    valid_model_types = {ModelType[mtype] for mtype in model_type_set}
     # create matrix of jobs to run
     jobs = [
         (model_name, solver_name)
         for model_name, model in models.items()
         for solver_name, solver in solvers.items()
         if model.model_type in solver.compatible_model_types
+        and model.model_type in valid_model_types
+        and model_name in valid_model_names
+        and solver_name in valid_solver_names
     ]
     # Set up run configuration file
     this_run_config.clear()  # clear existing configurations
@@ -56,6 +70,7 @@ def setup_new_matrix_run() -> None:
     # TODO check that other options don't need to be cached here
     # create directories and files
     this_run_dir = _make_new_run_dir()
+    print(f"Creating pysperf run{options['current run number']} in directory '{this_run_dir}'.")
     # Make solver/model directories
     for model_name, solver_name in jobs:
         single_job_dir = this_run_dir.joinpath(solver_name, model_name)
@@ -93,18 +108,36 @@ def setup_new_matrix_run() -> None:
 
 def setup_redo_matrix_run(run_number: Optional[int] = None,
                           redo_existing: Optional[bool] = False,
-                          redo_failed: Optional[bool] = False) -> None:
+                          redo_failed: Optional[bool] = False,
+                          model_set: Set[str] = (),
+                          solver_set: Set[str] = (),
+                          model_type_set: Set[str] = ()) -> None:
+    # Validate inputs
+    for model_name in model_set:
+        assert model_name in models, f"{model_name} is not in the model library."
+    for solver_name in solver_set:
+        assert solver_name in solvers, f"{solver_name} is not in the solver library."
+    valid_model_names = model_set if model_set else models.keys()
+    valid_solver_names = solver_set if solver_set else solvers.keys()
+    valid_model_types = {ModelType[mtype] for mtype in model_type_set}
+
+    # Handle run number
     if run_number:
         options["current run number"] = run_number
     this_run_dir = get_run_dir(run_number)
     _load_run_config(this_run_dir)
+    print(f"Re-executing pysperf run{options['current run number']} in directory '{this_run_dir}'.")
 
     existing_jobs_to_skip = set() if redo_existing else this_run_config.jobs_run
     failed_jobs_to_skip = set() if redo_failed else this_run_config.jobs_failed
 
     this_run_config.jobs_to_run = [
-        job for job in this_run_config.jobs
-        if job not in existing_jobs_to_skip and job not in failed_jobs_to_skip
+        (model_name, solver_name) for (model_name, solver_name) in this_run_config.jobs
+        if (model_name, solver_name) not in existing_jobs_to_skip
+        and (model_name, solver_name) not in failed_jobs_to_skip
+        and models[model_name].model_type in valid_model_types
+        and model_name in valid_model_names
+        and solver_name in valid_solver_names
     ]
 
     # Submit jobs for execution

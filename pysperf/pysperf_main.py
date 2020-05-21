@@ -33,18 +33,23 @@ def list_runs(args):
 
 
 def run(args):
+    print(args)  # For debugging
     if args.time_limit:
         options.time_limit = args.time_limit
     run_number = args.r
 
-    if any([args.models, args.solvers, args.model_types]):
-        raise NotImplementedError()
+    valid_models = args.models if args.models else set()
+    valid_solvers = args.solvers if args.solvers else set()
+    valid_model_types = args.model_types if args.model_types else set()
 
     # Perform setup
     if args.new:
-        setup_new_matrix_run()
+        setup_new_matrix_run(
+            model_set=valid_models, solver_set=valid_solvers, model_type_set=valid_model_types)
     elif args.redo:
-        setup_redo_matrix_run(run_number, args.redo_existing, args.redo_failed)
+        setup_redo_matrix_run(
+            run_number=run_number, redo_existing=args.redo_existing, redo_failed=args.redo_failed,
+            model_set=valid_models, solver_set=valid_solvers, model_type_set=valid_model_types)
 
     # Do the actual run
     if args.run_with == "torque":
@@ -55,16 +60,16 @@ def run(args):
         execute_run()
     else:
         pass
-    print(args)
 
 
 def analyze(args):
+    print(args)  # For debugging
     run_number = args.r
     collect_run_info(run_number)
-    print(args)
 
 
 def export(args):
+    print(args)  # For debugging
     run_number = args.r
     if args.make_solu_file:
         create_solu_file()
@@ -72,7 +77,6 @@ def export(args):
         create_paver_tracefile(run_number)
     if args.to_excel:
         export_to_excel(run_number)
-    print(args)
 
 
 def update_self(args):
@@ -107,9 +111,9 @@ def parse_command_line_arguments_and_run():
         '--run-with', choices=['serial', 'torque', 'setup-only'],
         help="Specify an execution engine.", default='torque')
     # Filtering which models and solvers to execute
-    run_parser.add_argument('--models', action='append', nargs='+', help="Run only specified models.")
-    run_parser.add_argument('--solvers', action='append', nargs='+', help="Run only specified solvers.")
-    run_parser.add_argument('--model-types', action='append', nargs='+', help="Run only specified model types.")
+    run_parser.add_argument('--models', action='store', nargs='+', help="Run only specified models.")
+    run_parser.add_argument('--solvers', action='store', nargs='+', help="Run only specified solvers.")
+    run_parser.add_argument('--model-types', action='store', nargs='+', help="Run only specified model types.")
     # Filtering for re-run
     run_parser.add_argument('--redo-existing', action='store_true', help="Rerun job if result file already exists.")
     run_parser.add_argument('--redo-failed', action='store_true', help="Rerun job if previous attempt failed.")

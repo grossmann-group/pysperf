@@ -8,8 +8,8 @@ from pysperf.solver_library_tools import register_GDP_reformulations, register_s
 
 @register_GDP_reformulations
 @register_solve_function(
-    compatible_model_types={ModelType.MINLP},
-    global_for_model_types={ModelType.cvxMINLP})
+    compatible_model_types={ModelType.MINLP, ModelType.MILP},
+    global_for_model_types={ModelType.cvxMINLP, ModelType.MILP})
 def DICOPT(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gams').solve(
@@ -29,8 +29,8 @@ def DICOPT(pyomo_model):
 
 @register_GDP_reformulations
 @register_solve_function(
-    compatible_model_types={ModelType.MINLP},
-    global_for_model_types={ModelType.MINLP})
+    compatible_model_types={ModelType.MINLP, ModelType.MILP},
+    global_for_model_types={ModelType.MINLP, ModelType.MILP})
 def BARON(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gams').solve(
@@ -50,8 +50,8 @@ def BARON(pyomo_model):
 
 @register_GDP_reformulations
 @register_solve_function(
-    compatible_model_types={ModelType.MINLP},
-    global_for_model_types={ModelType.MINLP})
+    compatible_model_types={ModelType.MINLP, ModelType.MILP},
+    global_for_model_types={ModelType.MINLP, ModelType.MILP})
 def SCIP(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gams').solve(
