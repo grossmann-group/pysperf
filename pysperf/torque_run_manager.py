@@ -21,7 +21,7 @@ def execute_run():
         qsub_time_limit = _qsub_time_limit_with_buffer(models[model_name].build_time)
         processes = options.processes
         memory = options.memory
-        qsub_N_arg = f'r{int(current_run_num)}-{jobnum}o{len(jobs)}-t{int(time_limit)}s'
+        qsub_N_arg = f'r{int(current_run_num)}X{jobnum}o{len(jobs)}Xt{int(time_limit)}s'
         # TODO -N can be no longer than 15 chars. For now, just truncate.
         qsub_N_arg = qsub_N_arg[:15]
         subprocess.run([
