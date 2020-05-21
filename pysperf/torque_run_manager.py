@@ -27,7 +27,7 @@ def execute_run():
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
-            f"-N pysperf",
+            # f"-N pysperf",
             f"{runner_script.resolve()}"
         ])
 
