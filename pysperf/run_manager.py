@@ -126,6 +126,7 @@ def setup_redo_matrix_run(run_number: Optional[int] = None,
         options["current run number"] = run_number
     this_run_dir = get_run_dir(run_number)
     _load_run_config(this_run_dir)
+    options.time_limit = this_run_config.time_limit
     print(f"Re-executing pysperf run{options['current run number']} in directory '{this_run_dir}'.")
 
     existing_jobs_to_skip = set() if redo_existing else this_run_config.jobs_run
