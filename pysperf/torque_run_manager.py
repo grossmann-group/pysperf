@@ -22,12 +22,13 @@ def execute_run():
         processes = options.processes
         memory = options.memory
         qsub_N_arg = f'r{int(current_run_num)}X{jobnum}o{len(jobs)}Xt{int(time_limit)}s'
+        qsub_N_arg = '"pysperf"'
         # TODO I can't get -N to work properly.
         qsub_N_arg = qsub_N_arg[:15]
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
-            # f"-N pysperf",
+            f"-N {qsub_N_arg}",
             f"{runner_script.resolve()}"
         ])
 
