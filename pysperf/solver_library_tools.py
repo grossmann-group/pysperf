@@ -5,7 +5,7 @@ from typing import Callable, Optional, Set
 import pandas
 
 from .base_classes import _JobResult, _TestSolver
-from .config import solvers, get_formatted_time_now
+from .config import _solver_info_log_path, solvers, get_formatted_time_now
 from .model_types import ModelType
 from pyomo.environ import TransformationFactory, ConcreteModel
 
@@ -117,7 +117,7 @@ def list_solver_capabilities():
     ).set_index("name").fillna('.')
     with pandas.option_context(
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
-    ), open('solvers.info.log', 'w') as resultsfile:
+    ), _solver_info_log_path.open('w') as resultsfile:
         print(df, file=resultsfile)
     print(df)
     print(textwrap.dedent("""\

@@ -26,7 +26,6 @@ def _build_list_subparser(list_parser: ArgumentParser):
 
 
 def _list_models(args):
-    print("Computing model statistics... this may take some time.")
     list_model_stats()
 
 

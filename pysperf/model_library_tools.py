@@ -8,7 +8,7 @@ import pandas
 import yaml
 
 from .base_classes import _TestModel
-from .config import _model_cache_path, models
+from .config import _model_cache_path, _model_info_log_path, models
 from .model_types import ModelType
 import pyomo.environ as pyo
 from pyomo.util.model_size import build_model_size_report
@@ -84,9 +84,15 @@ def compute_model_stats():
     models_loaded_from_cache = _load_from_model_stats_cache()
 
     _failed_model_names = []
+    uncached_models = False
     for test_model in models.values():
         if test_model.name in models_loaded_from_cache:
             continue
+        # Model is not already in the cache. Compute its statistics.
+        print(f"Model '{test_model.name}' is not in the cache. "
+              "Building the model and computing its statistics now. "
+              "This may take some time for larger models.")
+        uncached_models = True
         build_start_time = monotonic()
         try:
             pyomo_model = test_model.build_function()
@@ -110,7 +116,8 @@ def compute_model_stats():
         del models[failed_model]
 
     # Cache the model stats
-    _cache_model_stats()
+    if uncached_models:
+        _cache_model_stats()
 
 
 def list_model_stats():
@@ -126,7 +133,7 @@ def list_model_stats():
     ).set_index("name")
     with pandas.option_context(
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
-    ), open('models.info.log', 'w') as resultsfile:
+    ), _model_info_log_path.open('w') as resultsfile:
         print(df, file=resultsfile)
         print(df)
 
