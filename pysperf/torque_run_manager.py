@@ -22,7 +22,7 @@ def execute_run():
         processes = options.processes
         memory = options.memory
         qsub_N_arg = f'r{int(current_run_num)}-{jobnum}:{len(jobs)}-t{int(time_limit)}s'
-        qsub_N_arg = qsub_N_arg[:15]
+        qsub_N_arg = qsub_N_arg[:15]  # TODO qsub -N flag only accepts up to 15 characters. Truncate for now.
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
