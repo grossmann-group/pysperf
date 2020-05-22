@@ -108,18 +108,19 @@ def _build_export_subparser(export_parser: ArgumentParser):
     export_parser.add_argument('--make-solu-file', action='store_true', help="Make a Paver *.solu file.")
     export_parser.add_argument('--make-trace-file', action='store_true', help="Make a Paver *.trc file.")
     export_parser.add_argument('--to-excel', action='store_true', help="Export results to excel.")
-    export_parser.add_argument('-r', help="Specify a run number.", type=int)
+    export_parser.add_argument('-r', '--runs', nargs="+", help="Specify one or more run numbers.", type=int)
 
 
 def _export(args):
     print(args)  # For debugging
-    run_number = args.r
+    run_numbers = args.runs
     if args.make_solu_file:
         create_solu_file()
     if args.make_trace_file:
-        create_paver_tracefile(run_number)
+        assert len(run_numbers) == 1
+        create_paver_tracefile(run_numbers[0])
     if args.to_excel:
-        export_to_excel(run_number)
+        export_to_excel(run_numbers)
 
 
 def _update_self(args):

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import openpyxl
 import pandas
@@ -17,6 +17,12 @@ from .config import (
     job_start_filename,
     job_stop_filename, options, outputdir, )
 from .run_manager import _load_run_config, _write_run_config, get_run_dir, this_run_config
+
+
+def analyze_runs(run_numbers: Iterable[int] = ()):
+    if not run_numbers:
+        pass  # only single run (last run)
+    pass
 
 
 def collect_run_info(run_number: Optional[int] = None):
@@ -96,13 +102,28 @@ def _get_job_result(run_dir: Path, model: str, solver: str):
     return job_result
 
 
-def export_to_excel(run_number: Optional[int] = None):
-    this_run_dir = get_run_dir(run_number)
-    _load_run_config(this_run_dir)
+def export_to_excel(run_numbers: Iterable[int]) -> None:
     excel_columns = [
         "time", "model", "solver", "LB", "UB", "elapsed", "iterations",
         "tc", "sense", "soln_gap", "time_to_ok_soln",
         "time_to_soln", "opt_gap", "time_to_opt", "err_msg"]
+    rows = []
+    for run_number in run_numbers:
+        rows.extend(_collect_run_rows(run_number))
+
+    # Use Pandas to export to excel
+    df = pandas.DataFrame.from_records(
+        rows, columns=excel_columns
+    ).replace(  # replace infinity with empty cells
+        [float('inf'), float('-inf')], [None, None])
+    with pandas.ExcelWriter(str(outputdir.joinpath("results.xlsx"))) as writer:
+        df.to_excel(writer, sheet_name="data")
+    _autoformat_excel()
+
+
+def _collect_run_rows(run_number: int) -> List[Container]:
+    this_run_dir = get_run_dir(run_number)
+    _load_run_config(this_run_dir)
     rows = []
     # Process successfully complete jobs
     for job in this_run_config.jobs_run - this_run_config.jobs_failed:
@@ -145,14 +166,7 @@ def export_to_excel(run_number: Optional[int] = None):
             job_data.time_to_opt = float('inf')
 
         rows.append(job_data)
-    # Use Pandas to export to excel
-    df = pandas.DataFrame.from_records(
-        rows, columns=excel_columns
-    ).replace(  # replace infinity with empty cells
-        [float('inf'), float('-inf')], [None, None])
-    with pandas.ExcelWriter(str(outputdir.joinpath("results.xlsx"))) as writer:
-        df.to_excel(writer, sheet_name="data")
-    _autoformat_excel()
+    return rows
 
 
 def _autoformat_excel():
