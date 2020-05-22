@@ -25,6 +25,7 @@ def execute_run():
         qsub_N_arg = '"pysperf"'
         # TODO I can't get -N to work properly.
         qsub_N_arg = qsub_N_arg[:15]
+        print('N flag', qsub_N_arg)
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
