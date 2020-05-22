@@ -29,7 +29,7 @@ def execute_run():
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
-            f"-N {qsub_N_arg}",
+            "-N", qsub_N_arg,
             f"{runner_script.resolve()}"
         ])
 
