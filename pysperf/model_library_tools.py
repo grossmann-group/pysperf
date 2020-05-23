@@ -58,7 +58,10 @@ def register_model(
             bm_suffix = pyomo_model.BigM = pyo.Suffix()
         bm_suffix[None] = bigM
         return pyomo_model
-    new_model.build_function = build_function_with_BM_suffix
+    if bigM is not None:
+        new_model.build_function = build_function_with_BM_suffix
+    else:
+        new_model.build_function = build_function
     models[name] = new_model
 
 
