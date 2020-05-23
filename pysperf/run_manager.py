@@ -87,10 +87,10 @@ def setup_new_matrix_run(model_set: Set[str] = (),
         
         cd {single_job_dir.resolve()}
         echo "{separation_line}" >> stdout.log
-        echo "Pysperf execution at {get_formatted_time_now()}" >> stdout.log
+        echo "Pysperf execution at $(date)" >> stdout.log
         echo "{separation_line}" >> stdout.log
         echo "{separation_line}" >> stderr.log
-        echo "Pysperf execution at {get_formatted_time_now()}" >> stderr.log
+        echo "Pysperf execution at $(date)" >> stderr.log
         echo "{separation_line}" >> stderr.log
         {run_command}
         """
