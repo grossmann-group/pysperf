@@ -12,7 +12,7 @@ from .model_types import ModelType
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from .config import (
-    cache_internal_options_to_file, options, run_config_filename, runner_filepath, runsdir, )
+    cache_internal_options_to_file, get_formatted_time_now, options, run_config_filename, runner_filepath, runsdir, )
 
 this_run_config = Container()
 
@@ -81,10 +81,17 @@ def setup_new_matrix_run(model_set: Set[str] = (),
         run_command = (f'{sys.executable} {runner_filepath} '
                        f'"{solver_name}" "{model_name}" "{options.time_limit}s" '
                        f'> >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)')
+        separation_line = "-" * 60
         execute_script = f"""\
         #!/bin/bash
         
         cd {single_job_dir.resolve()}
+        echo "{separation_line}" >> stdout.log
+        echo "Pysperf execution at {get_formatted_time_now()}" >> stdout.log
+        echo "{separation_line}" >> stdout.log
+        echo "{separation_line}" >> stderr.log
+        echo "Pysperf execution at {get_formatted_time_now()}" >> stderr.log
+        echo "{separation_line}" >> stderr.log
         {run_command}
         """
         execute_script = textwrap.dedent(execute_script)
