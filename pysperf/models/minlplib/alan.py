@@ -1,4 +1,4 @@
-#  MINLP written by GAMS Convert at 05/10/19 14:22:24
+#  MINLP written by GAMS Convert at 05/15/20 00:50:42
 #  
 #  Equation counts
 #      Total        E        G        L        N        X        C        B
