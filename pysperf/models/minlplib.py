@@ -17,8 +17,12 @@ with minlplibdir.joinpath("MINLP.solu").open() as solufile:
     for model, data in pd.to_dict('index').items():
         if data['soln_type'] == "=opt=":
             model_solution_data[model] = {'opt_value': data['value']}
-        else:
+        elif data['soln_type'] == "=best=":
             model_solution_data[model] = {'best_value': data['value']}
+        elif data['soln_type'] == "=bestdual=":
+            pass  # We do not yet have handling for best lower bound
+        else:
+            raise NotImplementedError(f"Unrecognized solu file solution type: '{data['soln_type']}'")
 
 
 def _build_from_file_import(model_file_path: Path):
