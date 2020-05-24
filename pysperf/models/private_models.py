@@ -54,7 +54,6 @@ def _register_private_models():
         from ggmodels.membrane import build_membrane_model
         return build_membrane_model()
 
-
     # Methanol
     @register_model_builder(opt_value=-1793.4)
     def MeOH():

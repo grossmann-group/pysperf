@@ -16,14 +16,15 @@ def _register_gdplib_models():
     register_model(
         name="batchp",
         build_function=gdplib.pyomo_examples.build_batch_processing_model,
+        convex=True,
         bigM=1000, opt_value=679365)
     register_model(
         name="disease",
-        build_function=gdplib.pyomo_examples.build_jobshop_model,
+        build_function=gdplib.pyomo_examples.build_disease_model,
         bigM=1000, opt_value=304.4)
     register_model(
         name="jobshop",
-        build_function=gdplib.pyomo_examples.build_batch_processing_model,
+        build_function=gdplib.pyomo_examples.build_jobshop_model,
         bigM=None, opt_value=11)
     register_model(
         name="purchasing",
@@ -31,51 +32,70 @@ def _register_gdplib_models():
         bigM=None, opt_value=6797.5)
 
     # heat exchanger network synthesis models
-    @register_model_builder(opt_value=106767)
-    def HENS_conv():
-        return gdplib.mod_hens.build_conventional()
-    @register_model_builder(best_value=134522)
-    def HENS_int_sing():
-        return gdplib.mod_hens.build_integer_single_module()
-    @register_model_builder(best_value=112270)
-    def HENS_int_mult():
-        return gdplib.mod_hens.build_integer_single_module()
-    @register_model_builder(best_value=101505)
-    def HENS_int_opt():
-        return gdplib.mod_hens.build_integer_modular_option()
-    @register_model_builder(best_value=134522)
-    def HENS_disc_sing():
-        return gdplib.mod_hens.build_discrete_single_module()
-    @register_model_builder(best_value=111520)
-    def HENS_disc_mult():
-        return gdplib.mod_hens.build_discrete_require_modular()
-    @register_model_builder(best_value=101505)
-    def HENS_disc_opt():
-        return gdplib.mod_hens.build_discrete_modular_option()
+    register_model(
+        name="HENS_conv",
+        build_function=gdplib.mod_hens.build_conventional,
+        opt_value=106767,
+    )
+    register_model(
+        name="HENS_int_sing",
+        build_function=gdplib.mod_hens.build_integer_single_module,
+        best_value=134522,
+    )
+    register_model(
+        name="HENS_int_mult",
+        build_function=gdplib.mod_hens.build_integer_single_module,
+        best_value=112270,
+    )
+    register_model(
+        name="HENS_int_opt",
+        build_function=gdplib.mod_hens.build_integer_modular_option,
+        best_value=101505,
+    )
+    register_model(
+        name="HENS_disc_sing",
+        build_function=gdplib.mod_hens.build_discrete_single_module,
+        best_value=134522,
+    )
+    register_model(
+        name="HENS_disc_mult",
+        build_function=gdplib.mod_hens.build_discrete_require_modular,
+        best_value=111520,
+    )
+    register_model(
+        name="HENS_disc_opt",
+        build_function=gdplib.mod_hens.build_discrete_modular_option,
+        best_value=101505,
+    )
 
     # Modular network design - capacity expansion
-    @register_model_builder(bigM=7000, opt_value=3593)
-    def Mod_grow():
-        from gdplib.modprodnet import build_cap_expand_growth
-        return build_cap_expand_growth()
-    @register_model_builder(bigM=7000, opt_value=2096)
-    def Mod_dip():
-        from gdplib.modprodnet import build_cap_expand_dip
-        return build_cap_expand_dip()
-    @register_model_builder(bigM=7000, opt_value=851)
-    def Mod_decay():
-        from gdplib.modprodnet import build_cap_expand_decay
-        return build_cap_expand_decay()
+    register_model(
+        name="Mod_grow",
+        build_function=gdplib.modprodnet.build_cap_expand_growth,
+        bigM=7000, opt_value=3593,
+    )
+    register_model(
+        name="Mod_dip",
+        build_function=gdplib.modprodnet.build_cap_expand_dip,
+        bigM=7000, opt_value=2096,
+    )
+    register_model(
+        name="Mod_decay",
+        build_function=gdplib.modprodnet.build_cap_expand_decay,
+        bigM=7000, opt_value=851,
+    )
 
     # Modular network design - distributed facility location
-    @register_model_builder(bigM=10000, best_value=36262)
-    def Mod_dist():
-        from gdplib.modprodnet import build_distributed_model
-        return build_distributed_model()
-    @register_model_builder(bigM=10000, best_value=19568)
-    def Mod_qtr():
-        from gdplib.modprodnet import build_quarter_distributed_model
-        return build_quarter_distributed_model()
+    register_model(
+        name="Mod_dist",
+        build_function=gdplib.modprodnet.build_distributed_model,
+        bigM=10000, best_value=36262,
+    )
+    register_model(
+        name="Mod_qtr",
+        build_function=gdplib.modprodnet.build_quarter_distributed_model,
+        bigM=10000, best_value=19568,
+    )
 
     # Biofuel network
     register_model(
@@ -135,7 +155,6 @@ def _register_gdplib_models():
         name="Positioning",
         build_function=gdplib.logical.build_positioning_model,
         opt_value=-8.06)
-    pass
 
 
 if _library_models_available:

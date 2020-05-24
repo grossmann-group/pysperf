@@ -19,6 +19,7 @@ def _build_from_gdp_examples(build_name, *path):
 register_model(
     name="8PP",
     build_function=_build_from_gdp_examples('build_eight_process_flowsheet', 'eight_process', 'eight_proc_model.py'),
+    convex=True,
     bigM=100, opt_value=68.01)
 register_model(
     name="9PP",
@@ -32,16 +33,19 @@ register_model(
     name="CLAY",
     build_function=_build_from_gdp_examples(
         'build_constrained_layout_model', 'constrained_layout', 'cons_layout_model.py'),
+    convex=True,
     bigM=500, opt_value=41573)
 register_model(
     name="BS",
     build_function=_build_from_gdp_examples(
         'build_gdp_model', 'small_lit', 'basic_step.py'),
+    convex=True,
     bigM=100, opt_value=2.99)
 register_model(
     name="LeeEx1",
     build_function=_build_from_gdp_examples(
         'build_model', 'small_lit', 'ex1_Lee.py'),
+    convex=True,
     bigM=100, opt_value=1.17)
 register_model(
     name="Ex633",
