@@ -40,17 +40,17 @@ def _build_from_file_import(model_file_path: Path):
     return model_constructor
 
 
-for modelfile in minlplibdir.glob("*.py"):
-    try:
-        register_model(
-            name=modelfile.stem,
-            build_function=_build_from_file_import(modelfile),
-            opt_value=model_solution_data[modelfile.stem].get('opt_value', None),
-            best_value=model_solution_data[modelfile.stem].get('best_value', None)
-        )
-    except KeyError as err:
-        if str(err) == f"'{modelfile.stem}'":
-            print(f"Model {modelfile.stem} missing solution information. Omitting from library.")
-            continue
-        else:
-            raise
+# for modelfile in minlplibdir.glob("*.py"):
+#     try:
+#         register_model(
+#             name=modelfile.stem,
+#             build_function=_build_from_file_import(modelfile),
+#             opt_value=model_solution_data[modelfile.stem].get('opt_value', None),
+#             best_value=model_solution_data[modelfile.stem].get('best_value', None)
+#         )
+#     except KeyError as err:
+#         if str(err) == f"'{modelfile.stem}'":
+#             print(f"Model {modelfile.stem} missing solution information. Omitting from library.")
+#             continue
+#         else:
+#             raise
