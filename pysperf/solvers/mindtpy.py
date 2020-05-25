@@ -1,7 +1,7 @@
 from pyomo.environ import SolverFactory
 
-from pysperf.config import get_base_gams_options_list
-from pysperf import _JobResult, options
+from pysperf.base_classes import _JobResult
+from pysperf.config import get_base_gams_options_list, options
 from pysperf.solver_library_tools import register_solve_function
 
 
