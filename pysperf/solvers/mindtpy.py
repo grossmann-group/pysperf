@@ -23,7 +23,7 @@ def OA(pyomo_model):
         mip_solver_args=dict(solver='cplex', add_options=get_base_gams_options_list()),
         nlp_solver='gams',
         nlp_solver_args=dict(solver='ipopth', add_options=get_base_gams_options_list()),
-        iterlim=300,
+        iteration_limit=300,
         time_limit=options.time_limit
     )
     job_result.solver_run_time = pyomo_results.solver.timing.total
