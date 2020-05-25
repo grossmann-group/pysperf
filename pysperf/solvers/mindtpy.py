@@ -17,8 +17,8 @@ def OA(pyomo_model):
         tee=True,
         mip_solver='gams',
         mip_solver_args=dict(solver='cplex', add_options=get_base_gams_options_list()),
-        nlp_solver='ipopt',
-        # nlp_solver_args=dict(solver='ipopth', add_options=get_base_gams_options_list()),
+        nlp_solver='gams',
+        nlp_solver_args=dict(solver='ipopth', add_options=get_base_gams_options_list()),
         iterlim=300,
         time_limit=options.time_limit
     )
