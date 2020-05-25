@@ -81,7 +81,7 @@ def create_paver_tracefile(run_number: Optional[int] = None):
 
 
 def _validate_job_result(job_result: _JobResult):
-    if job_result.termination_condition is None:
+    if job_result.termination_condition is None or job_result.termination_condition == 'None':
         job_result.termination_condition = pyo.TerminationCondition.unknown
     elif type(job_result.termination_condition) == str:
         job_result.termination_condition = pyo.TerminationCondition(job_result.termination_condition)
