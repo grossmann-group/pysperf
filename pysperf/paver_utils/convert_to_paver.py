@@ -6,7 +6,7 @@ from typing import Optional
 import pyomo.environ as pyo
 import yaml
 
-from pysperf import _JobResult
+from pysperf.base_classes import _JobResult
 from pysperf.config import outputdir, time_format
 from pysperf.model_library import models
 from pysperf.solver_library import solvers

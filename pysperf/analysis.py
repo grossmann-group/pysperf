@@ -8,7 +8,7 @@ import yaml
 from pyomo.environ import SolverStatus, TerminationCondition as pyomo_tc
 from pyutilib.misc import Container
 
-from pysperf import _JobResult
+from pysperf.base_classes import _JobResult
 from pysperf.model_library import models
 from pysperf.solver_library import solvers
 from .base_classes import _TestModel, _TestSolver

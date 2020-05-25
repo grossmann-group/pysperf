@@ -2,12 +2,16 @@ from pyomo.environ import SolverFactory
 
 from pysperf.base_classes import _JobResult
 from pysperf.config import get_base_gams_options_list, options
-from pysperf.solver_library_tools import register_solve_function
+from pysperf.model_types import ModelType
+from pysperf.solver_library_tools import register_GDP_reformulations, register_solve_function
 
 
+@register_GDP_reformulations
 @register_solve_function(
     name="MindtPy-OA",
-    milp="cplex", nlp="ipopth"
+    milp="cplex", nlp="ipopth",
+    compatible_model_types={ModelType.MINLP, ModelType.cvxMINLP, ModelType.MILP},
+    global_for_model_types={ModelType.cvxMINLP, ModelType.MILP}
 )
 def OA(pyomo_model):
     job_result = _JobResult()

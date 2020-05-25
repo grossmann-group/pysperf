@@ -1,17 +1,16 @@
 import logging
 from math import ceil
-from pathlib import Path
 from time import monotonic
 from typing import Callable, Optional
 
 import pandas
+import pyomo.environ as pyo
 import yaml
+from pyomo.util.model_size import build_model_size_report
 
 from .base_classes import _TestModel
 from .config import _model_cache_path, _model_info_log_path, models
 from .model_types import ModelType
-import pyomo.environ as pyo
-from pyomo.util.model_size import build_model_size_report
 
 
 def register_model(

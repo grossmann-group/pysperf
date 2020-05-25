@@ -9,7 +9,7 @@ from pysperf.solver_library_tools import register_solve_function
 @register_solve_function(
     name="GDPopt-LOA",
     milp='cplex', nlp='ipopth',
-    compatible_model_types={ModelType.GDP, ModelType.DP},
+    compatible_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP},
     global_for_model_types={ModelType.cvxGDP, ModelType.DP})
 def LOA(pyomo_model):
     job_result = _JobResult()
@@ -37,8 +37,8 @@ def LOA(pyomo_model):
 @register_solve_function(
     name="GDPopt-GLOA",
     milp='cplex', nlp='baron',
-    compatible_model_types={ModelType.GDP, ModelType.DP},
-    global_for_model_types={ModelType.GDP, ModelType.DP})
+    compatible_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP},
+    global_for_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP})
 def GLOA(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gdpopt').solve(
@@ -66,8 +66,8 @@ def GLOA(pyomo_model):
 @register_solve_function(
     name="GDPopt-GLOA-DVB",
     milp='cplex', nlp='baron',
-    compatible_model_types={ModelType.GDP, ModelType.DP},
-    global_for_model_types={ModelType.GDP, ModelType.DP})
+    compatible_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP},
+    global_for_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP})
 def GLOA_with_disjunctive_bounds(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gdpopt').solve(
@@ -96,8 +96,8 @@ def GLOA_with_disjunctive_bounds(pyomo_model):
 @register_solve_function(
     name="GDPopt-LBB",
     milp='cplex', nlp='baron',
-    compatible_model_types={ModelType.GDP, ModelType.DP},
-    global_for_model_types={ModelType.GDP, ModelType.DP})
+    compatible_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP},
+    global_for_model_types={ModelType.GDP, ModelType.cvxGDP, ModelType.DP})
 def LBB(pyomo_model):
     job_result = _JobResult()
     pyomo_results = SolverFactory('gdpopt').solve(
