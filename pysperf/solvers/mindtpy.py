@@ -15,7 +15,7 @@ from pysperf.solver_library_tools import register_GDP_reformulations, register_s
 )
 def OA(pyomo_model):
     job_result = _JobResult()
-    pyomo_results = SolverFactory('gdpopt').solve(
+    pyomo_results = SolverFactory('mindtpy').solve(
         pyomo_model,
         strategy='OA',
         tee=True,
