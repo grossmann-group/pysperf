@@ -9,7 +9,7 @@ from pathlib import Path
 
 from .analysis import collect_run_info, export_to_excel
 from .config import options, runsdir
-from .model_library_tools import list_model_stats
+from .model_library import list_model_stats
 from .paver_utils.convert_to_paver import create_paver_tracefile, create_solu_file
 from .run_manager import setup_new_matrix_run, setup_redo_matrix_run
 from .solver_library_tools import list_solver_capabilities
@@ -19,6 +19,7 @@ def _build_list_subparser(list_parser: ArgumentParser):
     list_subparsers = list_parser.add_subparsers()
     list_models_parser = list_subparsers.add_parser('models')
     list_models_parser.set_defaults(call_function=_list_models)
+    list_models_parser.add_argument('--models', action='store', nargs='+', help="List details of specified models.")
     list_solvers_parser = list_subparsers.add_parser('solvers')
     list_solvers_parser.set_defaults(call_function=_list_solvers)
     list_runs_parser = list_subparsers.add_parser('runs')
@@ -26,7 +27,12 @@ def _build_list_subparser(list_parser: ArgumentParser):
 
 
 def _list_models(args):
-    list_model_stats()
+    if args.models:
+        from pysperf.model_library import models
+        for model in args.models:
+            print(models[model])
+    else:
+        list_model_stats()
 
 
 def _list_solvers(args):

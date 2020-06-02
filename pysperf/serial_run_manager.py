@@ -5,10 +5,11 @@ import yaml
 from .config import run_config_filename
 
 from pysperf import options
-from pysperf.model_library import models
+from pysperf.model_library import models, requires_model_stats
 from .run_manager import _load_run_config, get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
+@requires_model_stats
 def execute_run():
     # Read in config
     # Start executing the *.sh files
