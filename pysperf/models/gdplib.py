@@ -9,7 +9,7 @@ except ImportError:
     gdplib = None
     _library_models_available = False
 
-from pysperf.model_library_tools import register_model, register_model_builder
+from pysperf.model_library_registration import register_model
 
 
 def _register_gdplib_models():

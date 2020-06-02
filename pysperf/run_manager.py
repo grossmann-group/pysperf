@@ -9,7 +9,7 @@ import yaml
 from pyutilib.misc import Container
 
 from .model_types import ModelType
-from pysperf.model_library import models
+from pysperf.model_library import models, requires_model_stats
 from pysperf.solver_library import solvers
 from .config import (
     cache_internal_options_to_file, get_formatted_time_now, options, run_config_filename, runner_filepath, runsdir, )
@@ -41,6 +41,7 @@ def _load_run_config(this_run_dir: Optional[Path] = None):
         this_run_config.jobs_run = set((model, solver) for model, solver in this_run_config.jobs_run)
 
 
+@requires_model_stats
 def setup_new_matrix_run(model_set: Set[str] = (),
                          solver_set: Set[str] = (),
                          model_type_set: Set[str] = ()) -> None:
@@ -113,6 +114,7 @@ def setup_new_matrix_run(model_set: Set[str] = (),
     _write_run_config(this_run_dir)
 
 
+@requires_model_stats
 def setup_redo_matrix_run(run_number: Optional[int] = None,
                           redo_existing: Optional[bool] = False,
                           redo_failed: Optional[bool] = False,

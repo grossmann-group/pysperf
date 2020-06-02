@@ -211,5 +211,11 @@ def _calculate_gaps(test_model: _TestModel, test_solver: _TestSolver, lb: float,
     lower_bound_value = solution_value if lower_bound_value > solution_value else lower_bound_value
 
     soln_gap = abs((solution_value - correct_solution) / correct_solution)
-    opt_gap = abs((solution_value - lower_bound_value) / correct_solution) if global_opt_known else None
+    if global_opt_known:
+        opt_gap = abs((solution_value - lower_bound_value) / correct_solution)
+        # Global solver can converge to incorrect value.
+        # The optimality gap should not be less than the solution gap.
+        opt_gap = max(soln_gap, opt_gap)
+    else:
+        opt_gap = None
     return soln_gap, opt_gap
