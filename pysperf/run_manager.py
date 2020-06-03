@@ -9,10 +9,10 @@ import yaml
 from pyutilib.misc import Container
 
 from .model_types import ModelType
-from pysperf.model_library import models
+from pysperf.model_library import models, requires_model_stats
 from pysperf.solver_library import solvers
 from .config import (
-    cache_internal_options_to_file, options, run_config_filename, runner_filepath, runsdir, )
+    cache_internal_options_to_file, get_formatted_time_now, options, run_config_filename, runner_filepath, runsdir, )
 
 this_run_config = Container()
 
@@ -41,6 +41,7 @@ def _load_run_config(this_run_dir: Optional[Path] = None):
         this_run_config.jobs_run = set((model, solver) for model, solver in this_run_config.jobs_run)
 
 
+@requires_model_stats
 def setup_new_matrix_run(model_set: Set[str] = (),
                          solver_set: Set[str] = (),
                          model_type_set: Set[str] = ()) -> None:
@@ -81,10 +82,17 @@ def setup_new_matrix_run(model_set: Set[str] = (),
         run_command = (f'{sys.executable} {runner_filepath} '
                        f'"{solver_name}" "{model_name}" "{options.time_limit}s" '
                        f'> >(tee -a stdout.log) 2> >(tee -a stderr.log >&2)')
+        separation_line = "-" * 60
         execute_script = f"""\
         #!/bin/bash
         
         cd {single_job_dir.resolve()}
+        echo "{separation_line}" >> stdout.log
+        echo "Pysperf execution at $(date)" >> stdout.log
+        echo "{separation_line}" >> stdout.log
+        echo "{separation_line}" >> stderr.log
+        echo "Pysperf execution at $(date)" >> stderr.log
+        echo "{separation_line}" >> stderr.log
         {run_command}
         """
         execute_script = textwrap.dedent(execute_script)
@@ -106,6 +114,7 @@ def setup_new_matrix_run(model_set: Set[str] = (),
     _write_run_config(this_run_dir)
 
 
+@requires_model_stats
 def setup_redo_matrix_run(run_number: Optional[int] = None,
                           redo_existing: Optional[bool] = False,
                           redo_failed: Optional[bool] = False,
@@ -126,6 +135,7 @@ def setup_redo_matrix_run(run_number: Optional[int] = None,
         options["current run number"] = run_number
     this_run_dir = get_run_dir(run_number)
     _load_run_config(this_run_dir)
+    options.time_limit = this_run_config.time_limit
     print(f"Re-executing pysperf run{options['current run number']} in directory '{this_run_dir}'.")
 
     existing_jobs_to_skip = set() if redo_existing else this_run_config.jobs_run

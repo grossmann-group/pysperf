@@ -26,6 +26,8 @@ job_solve_done_filename = ".job_solve_done.log"
 _internal_config_file = Path(__file__).parent.joinpath('.internal.config.pfcache')
 _model_cache_path = Path(__file__).parent.joinpath('model.info.pfcache')
 run_config_filename = "run.config.pfdata"
+_model_info_log_path = outputdir.joinpath("models.info.log")
+_solver_info_log_path = outputdir.joinpath("solvers.info.log")
 
 # Load in user and internal options caches
 with Path(__file__).parent.joinpath('pysperf.config').open() as _user_config_file:

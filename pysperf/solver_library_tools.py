@@ -5,9 +5,13 @@ from typing import Callable, Optional, Set
 import pandas
 
 from .base_classes import _JobResult, _TestSolver
-from .config import solvers, get_formatted_time_now
+from .config import _solver_info_log_path, solvers, get_formatted_time_now
 from .model_types import ModelType
 from pyomo.environ import TransformationFactory, ConcreteModel
+
+# Maps registered solver functions to their names in the library
+# when decorator is used.
+_name_map = dict()
 
 
 def register_solver(
@@ -36,22 +40,16 @@ def register_solve_function(
         register_solver(solve_function.__name__, solve_function,
                         milp, nlp,
                         compatible_model_types, global_for_model_types)
-        # Pass information to the register_GDP_reformulations decorator, if needed
-        solve_function._milp = milp
-        solve_function._nlp = nlp
-        solve_function._compat_mtypes = compatible_model_types
-        solve_function._global_mtypes = global_for_model_types
+        # Necessary to pass information to the register_GDP_reformulations decorator
+        _name_map[solve_function] = solve_function.__name__
         return solve_function
 
     def named_decorator(solve_function):
         register_solver(name, solve_function,
                         milp, nlp,
                         compatible_model_types, global_for_model_types)
-        # Pass information to the register_GDP_reformulations decorator, if needed
-        solve_function._milp = milp
-        solve_function._nlp = nlp
-        solve_function._compat_mtypes = compatible_model_types
-        solve_function._global_mtypes = global_for_model_types
+        # Necessary to pass information to the register_GDP_reformulations decorator
+        _name_map[solve_function] = name
         return solve_function
 
     if name is None:
@@ -66,13 +64,15 @@ def register_GDP_reformulations(mip_solve_function):
         'HR': TransformationFactory('gdp.chull'),
     }
 
+    base_solver = solvers[_name_map[mip_solve_function]]
+
     # TODO this can be done better
     mip_to_gdp_map = {
         ModelType.MINLP: ModelType.GDP, ModelType.cvxMINLP: ModelType.cvxGDP,
         ModelType.MILP: ModelType.DP
     }
-    gdp_compatible_mtypes = {mip_to_gdp_map[mtype] for mtype in mip_solve_function._compat_mtypes}
-    gdp_global_mtypes = {mip_to_gdp_map[mtype] for mtype in mip_solve_function._global_mtypes}
+    gdp_compatible_mtypes = {mip_to_gdp_map[mtype] for mtype in base_solver.compatible_model_types}
+    gdp_global_mtypes = {mip_to_gdp_map[mtype] for mtype in base_solver.global_for_model_types}
 
     def get_solve_function_with_xfrm(xfrm):
         def gdp_solve_function(pyomo_model: ConcreteModel) -> _JobResult:
@@ -87,10 +87,10 @@ def register_GDP_reformulations(mip_solve_function):
 
     for xfrm_name, xfrm in gdp_transformation_methods.items():
         register_solver(
-            name=mip_solve_function.__name__ + "-" + xfrm_name,
+            name=base_solver.name + "-" + xfrm_name,
             solve_function=get_solve_function_with_xfrm(xfrm),
-            milp=mip_solve_function._milp,
-            nlp=mip_solve_function._nlp,
+            milp=base_solver.milp,
+            nlp=base_solver.nlp,
             compatible_model_types=gdp_compatible_mtypes,
             global_for_model_types=gdp_global_mtypes,
         )
@@ -117,7 +117,7 @@ def list_solver_capabilities():
     ).set_index("name").fillna('.')
     with pandas.option_context(
             'display.max_rows', None, 'display.max_columns', None, 'expand_frame_repr', False
-    ), open('solvers.info.log', 'w') as resultsfile:
+    ), _solver_info_log_path.open('w') as resultsfile:
         print(df, file=resultsfile)
     print(df)
     print(textwrap.dedent("""\

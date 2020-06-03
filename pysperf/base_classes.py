@@ -11,3 +11,10 @@ class _TestSolver(Container):
 
 class _JobResult(Container):
     pass
+
+
+class _Infeasible(object):
+    pass
+
+
+InfeasibleExpected = _Infeasible()

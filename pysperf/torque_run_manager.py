@@ -3,10 +3,11 @@ import subprocess
 import yaml
 
 from pysperf import options
-from pysperf.model_library import models
+from pysperf.model_library import models, requires_model_stats
 from .run_manager import _load_run_config, get_run_dir, get_time_limit_with_buffer, this_run_config
 
 
+@requires_model_stats
 def execute_run():
     # Read in config
     # Start executing the *.sh files
@@ -21,12 +22,12 @@ def execute_run():
         qsub_time_limit = _qsub_time_limit_with_buffer(models[model_name].build_time)
         processes = options.processes
         memory = options.memory
+        qsub_N_arg = f'r{int(current_run_num)}-{jobnum}:{len(jobs)}-t{int(time_limit)}s'
+        qsub_N_arg = qsub_N_arg[:15]  # TODO qsub -N flag only accepts up to 15 characters. Truncate for now.
         subprocess.run([
             "qsub", "-l",
             f"walltime={qsub_time_limit},nodes=1:ppn={processes},mem={memory}GB",
-            # TODO qsub is very finicky about what -N values it accepts. We will need to experiment with this.
-            # Not high priority, since it is only cosmetic.
-            # f'-N "pysperf-r{current_run_num}-{jobnum}:{len(jobs)}-t{time_limit}s"',
+            "-N", qsub_N_arg,
             f"{runner_script.resolve()}"
         ])
 
