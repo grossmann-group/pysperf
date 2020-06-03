@@ -3,7 +3,6 @@ Main script file for pysperf.
 
 This file contains the argument parser to interpret command line arguments to pysperf.
 """
-import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -130,12 +129,14 @@ def _export(args):
 
 def _update_self(args):
     print("WARNING: This is a convenience function. Developer use only.")
+    import subprocess
     subprocess.run(['git pull'], shell=True, cwd=Path(__file__).parent.resolve())
     subprocess.run(['git branch -vvv'], shell=True, cwd=Path(__file__).parent.resolve())
 
 
-def parse_command_line_arguments_and_run():
+def main():
     parser = ArgumentParser(
+        prog="pysperf",
         description="Pysperf: the Pyomo Solver Performance benchmarking tool. "
                     "Access help for each command using 'pysperf <command> -h'."
     )
@@ -181,4 +182,4 @@ def parse_command_line_arguments_and_run():
 
 
 if __name__ == "__main__":
-    parse_command_line_arguments_and_run()
+    main()

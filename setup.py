@@ -24,7 +24,7 @@ kwargs = dict(
     author='Qi Chen',
     author_email='qichen@andrew.cmu.edu',
     maintainer='Qi Chen',
-    url="https://github.com/qtothec/pysperf",
+    url="https://github.com/grossmann-group/pysperf",
     license='BSD 2-clause',
     description="Pyomo Solver Performance Benchmarking Library",
     long_description=__doc__,
@@ -38,6 +38,10 @@ kwargs = dict(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
+    entry_points="""\
+        [console_scripts]
+        pysperf=pysperf.__main__:main
+    """
 )
 
 try:
