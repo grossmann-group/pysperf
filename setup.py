@@ -38,6 +38,10 @@ kwargs = dict(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules"
     ],
+    entry_points="""\
+        [console_scripts]
+        pysperf=pysperf.__main__:main
+    """
 )
 
 try:
